@@ -34,6 +34,8 @@ func _initialize() -> void:
     call_deferred("run")
 
 func run() -> void:
+    var had_progress := FileAccess.file_exists("user://progress.cfg")
+    var previous_progress := FileAccess.get_file_as_bytes("user://progress.cfg") if had_progress else PackedByteArray()
     var baseline := run_solution()
     for fps in [30, 60, 120]:
         var s = Solver.new()
@@ -110,6 +112,11 @@ func run() -> void:
     root.add_child(game)
     game.set_process(false)
     await process_frame
+    game._start_play()
+    game.muted = false
+    game.reduced_motion = false
+    for visual in game.bun_nodes.values():
+        visual.wobble_enabled = true
     check(game.bun_nodes.size() == 4, "Playable scene instantiates four real rigged buns")
     var node = game.bun_nodes[1]
     check(node.skeleton and node.skeleton.get_bone_count() == 11, "Runtime skeleton includes independent Crest bone")
@@ -155,12 +162,18 @@ func run() -> void:
     game._retry()
     game.size = Vector2(390, 844)
     game._layout()
-    check(game.board_rect.position.x >= 0 and game.retry_button.position.y + 50 <= 844, "Portrait layout keeps board and controls visible")
+    check(game.board_rect.position.x >= 0 and game.undo_button.position.y + game.undo_button.size.y <= 844 and game.pause_button.size.y >= 48, "Portrait layout keeps board and controls visible")
     game.size = Vector2(1280, 800)
     game._layout()
-    check(game.recipe.visible and game.left_note.visible, "Desktop layout exposes recipe and quiet side columns")
+    check(game.board_rect.size.y >= 800 * 0.65 and not game.pause_card.visible, "Desktop layout gives the board priority with a compact HUD")
     game.queue_free()
     await process_frame
+    if had_progress:
+        var progress := FileAccess.open("user://progress.cfg", FileAccess.WRITE)
+        progress.store_buffer(previous_progress)
+        progress.close()
+    else:
+        DirAccess.remove_absolute(ProjectSettings.globalize_path("user://progress.cfg"))
     var report := {"passed": failures.is_empty(), "checks": checks, "failures": failures,
         "fixed_step_hz": 120, "render_fps_replays": [30, 60, 120], "solution": baseline.schedule,
         "device_performance": "Not measured on a physical Android device"}
