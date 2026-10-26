@@ -1,0 +1,83 @@
+{
+  "checks": [
+    "Solution shot accepted",
+    "Solution shot accepted",
+    "Solution shot accepted",
+    "Solution shot accepted",
+    "Actual physics completes four-shot escape",
+    "Identical physics at 30 render FPS",
+    "Identical physics at 60 render FPS",
+    "Identical physics at 120 render FPS",
+    "Tier 1 gate at negligible speed",
+    "No gate tunneling for tier 1",
+    "Tier 2 gate at negligible speed",
+    "No gate tunneling for tier 2",
+    "Tier 3 gate at negligible speed",
+    "No gate tunneling for tier 3",
+    "Merge conserves planar momentum",
+    "Triple contact consumes each bun once",
+    "Unequal tiers bounce",
+    "Maximum tier has no hidden upgrade",
+    "Maximum-speed jelly contact does not tunnel",
+    "Exact spring agrees at 30 FPS",
+    "Exact spring agrees at 60 FPS",
+    "Exact spring agrees at 120 FPS",
+    "Squash preserves volume at 0.72",
+    "Squash preserves volume at 0.85",
+    "Squash preserves volume at 1.00",
+    "Squash preserves volume at 1.20",
+    "Playable scene instantiates four real rigged buns",
+    "Runtime skeleton includes independent Crest bone",
+    "Imported clip plays: idle",
+    "Imported clip plays: blink",
+    "Imported clip plays: pull",
+    "Imported clip plays: release",
+    "Imported clip plays: impact",
+    "Imported clip plays: merge",
+    "Imported clip plays: hop",
+    "Imported clip plays: escape",
+    "Touch hold sustains smooth pull squash",
+    "Aim preview simulates the actual solver",
+    "Canceled touch releases pose without shooting",
+    "Mouse release launches immediately and snapshots undo",
+    "Undo restores exact pre-shot state",
+    "Pause freezes physics and visual animation",
+    "Mute stops audio",
+    "Retry resets buns, gate and shots",
+    "Show me completes the level using physics shots",
+    "Undo re-closes gate after winning",
+    "Portrait layout keeps board and controls visible",
+    "Desktop layout exposes recipe and quiet side columns"
+  ],
+  "device_performance": "Not measured on a physical Android device",
+  "failures": [],
+  "fixed_step_hz": 120,
+  "passed": true,
+  "render_fps_replays": [
+    30,
+    60,
+    120
+  ],
+  "solution": [
+    {
+      "id": 1.0,
+      "tick": 0,
+      "velocity": "(0.0, 5.4)"
+    },
+    {
+      "id": 2.0,
+      "tick": 331,
+      "velocity": "(0.0, 5.4)"
+    },
+    {
+      "id": 5.0,
+      "tick": 662,
+      "velocity": "(7.0, 0.0)"
+    },
+    {
+      "id": 7.0,
+      "tick": 1014,
+      "velocity": "(-4.0, 9.0)"
+    }
+  ]
+}

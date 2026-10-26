@@ -1,0 +1,88 @@
+{
+  "passed": true,
+  "assets": {
+    "berry": {
+      "bytes": 474496,
+      "triangles": 7748,
+      "mesh_nodes": 8,
+      "materials": 7,
+      "animations": [
+        "idle",
+        "blink",
+        "pull",
+        "release",
+        "impact",
+        "merge",
+        "hop",
+        "escape"
+      ]
+    },
+    "mango": {
+      "bytes": 489124,
+      "triangles": 8188,
+      "mesh_nodes": 8,
+      "materials": 7,
+      "animations": [
+        "idle",
+        "blink",
+        "pull",
+        "release",
+        "impact",
+        "merge",
+        "hop",
+        "escape"
+      ]
+    },
+    "pip": {
+      "bytes": 626780,
+      "triangles": 9832,
+      "mesh_nodes": 7,
+      "materials": 6,
+      "animations": [
+        "idle",
+        "blink",
+        "pull",
+        "release",
+        "impact",
+        "merge",
+        "hop",
+        "escape"
+      ]
+    },
+    "exit_plate": {
+      "bytes": 134760,
+      "triangles": 4508,
+      "mesh_nodes": 4,
+      "materials": 4,
+      "animations": []
+    },
+    "jelly_bumper": {
+      "bytes": 130808,
+      "triangles": 5016,
+      "mesh_nodes": 2,
+      "materials": 2,
+      "animations": []
+    },
+    "reward_star": {
+      "bytes": 78228,
+      "triangles": 1912,
+      "mesh_nodes": 2,
+      "materials": 2,
+      "animations": []
+    },
+    "tray": {
+      "bytes": 121024,
+      "triangles": 4236,
+      "mesh_nodes": 4,
+      "materials": 5,
+      "animations": []
+    },
+    "wafer_gate": {
+      "bytes": 188048,
+      "triangles": 4600,
+      "mesh_nodes": 7,
+      "materials": 5,
+      "animations": []
+    }
+  }
+}
