@@ -11,12 +11,20 @@ func _ready() -> void:
             mode = arg.trim_prefix("--mode=")
     game = load("res://main.tscn").instantiate()
     add_child(game)
+    game.muted = false
+    game.reduced_motion = false
+    for visual in game.bun_nodes.values():
+        visual.wobble_enabled = true
     if mode == "desktop":
         get_window().size = Vector2i(1280, 800)
     elif mode != "play":
         get_window().size = Vector2i(720, 1120)
     if mode == "play":
         game._show_me()
+    elif mode != "title":
+        game._start_play()
+        if mode == "pause":
+            game._toggle_pause()
 
 func _process(delta: float) -> void:
     elapsed += delta

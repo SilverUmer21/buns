@@ -4,6 +4,13 @@ These are ordinary HTTPS links hosted on the repository's dedicated `downloads` 
 
 ## Previous v0.2 baseline
 
+## Current v0.3 game-flow and motion build
+
+- [Playable v0.3 Godot ZIP](https://raw.githubusercontent.com/SilverUmer21/buns/downloads/Bunbreak-v0.3-godot.zip)
+- [SHA-256 checksum](https://raw.githubusercontent.com/SilverUmer21/buns/downloads/v0.3-SHA256SUMS)
+
+This adds the game-style title/play/pause/result/trail flow, reduced motion and corrected directional jiggle. Run it in Godot 4.6.3 Standard. Headless validation: 48 gameplay, 56 motion and 35 flow checks. Physical Android input/performance remains a separate review.
+
 - [Playable Godot project ZIP — 947 KiB](https://raw.githubusercontent.com/SilverUmer21/buns/downloads/bunbreak-v2-godot.zip)
 - [Model and animation review PDF — 8.9 MiB](https://raw.githubusercontent.com/SilverUmer21/buns/downloads/Bunbreak-v2-review.pdf)
 - [Complete Blender and Godot ZIP — 28.4 MiB](https://raw.githubusercontent.com/SilverUmer21/buns/downloads/bunbreak-v2-complete.zip)
