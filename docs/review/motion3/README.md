@@ -1,0 +1,7 @@
+# Mobile motion review · 27 October 2026
+
+These contact sheets are actual Chromium/Three.js frames at 390 × 844 CSS pixels, with the default 45° board angle. They show pull and direction reversal, launch, both merge tiers and escape through the result panel. The first reversal check detected an abrupt transition; the pull-vector and body springs were softened and the sequence was rerun before these captures.
+
+Validation on the final motion build: `node --test web/tests/*.test.mjs` passed 48 tests; `animation_sequence.py` captured 38 action frames and passed transition, volume, launch, merge and win checks; `mobile_layout.py` passed 320 × 568 and 390 × 844 portrait and 844 × 390 landscape target/layout checks; `camera_browser.py`, `character_review.py`, `motion_consistency.py`, and `browser_review.py` passed. Rendered rig state was compared at 30/60/120 simulated render schedules, not measured device frame rates. GitHub Actions run 40553254129 passed on the same code.
+
+Visual assessment: both incoming buns are visible before the next tier appears; effects stay local, and the winning bun hops before the result panel. Pull and release remain on the board without modifying physics. These captures are desktop software rendering in an emulated phone viewport, not human playtesting or a phone performance measurement. Real-device touch, frame rate, battery and thermal behavior, notch handling, and subjective animation feel remain to be reviewed.
