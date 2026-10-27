@@ -16,6 +16,13 @@ The active product direction is now the browser build in `web/`: six implemented
 
 ## Current owner-requested iteration
 
+### Teardrop silhouette correction
+
+1. Inspect the oval-producing radial expansion and review taper deformation references.
+2. Replace pulled-side thickening with a tapered shoulder and narrow rounded tip while preserving the anchored bulb and face.
+3. Review rendered all-tier weak/strong and multi-direction silhouettes, then check recoil, cancellation and recovery.
+4. Keep physics fixtures passing; push a focused shape patch, publish the preview and refresh the verified browser ZIP.
+
 ### Tactile rework
 
 1. Inspect rejected phone frames and current runtime; record the diagonal deformation defect and the weak silhouette/merge staging.

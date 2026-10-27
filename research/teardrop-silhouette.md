@@ -1,0 +1,9 @@
+# Correcting the held silhouette
+
+The owner says the interaction is improving but the stretched dough still has the wrong form. Inspection confirms why: the current field explicitly increases perpendicular cross-sections toward the finger. That produces a broad oval, even when one edge is anchored.
+
+The implementation needs two coordinated controls: extend along the finger axis and reduce perpendicular radius across the shoulder/tip, leaving the anchored bulb round. The tip remains rounded, with a smooth positive-radius transition. Preserve the face around the plump region rather than carrying it toward the tip. The exact profile and amplitude are Bunbreak art choices, to be assessed in rendered phone-size views.
+
+Primary technical reference: Alan Barr's [Global and local deformations of solid primitives](https://authors.library.caltech.edu/records/99pd2-73028), institutional abstract, describes tapering and transforming surface normals alongside deformed positions. This supports the implementation technique, not a particular cute-bun shape. The [Blender Simple Deform manual](https://docs.blender.org/manual/en/latest/modeling/modifiers/deform/simple_deform.html) was found as a candidate taper reference; its full page could not be opened in this session, so no claim is based on reading it.
+
+Acceptance: inspect all three tiers, horizontal/vertical/diagonal directions and weak/strong pulls. The widest region should remain on the anchored body, the pulled shoulder should narrow, and a rounded small tip should point toward the finger. No face burial, pointy spear, seam, inverted geometry, shader errors or directional snap. Keep shot physics, 45° default, existing recoil/merge behavior and the palette. Whole-mesh volume remains an artistic approximation, not a validated soft-body simulation.

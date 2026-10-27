@@ -37,6 +37,8 @@ The previous smoothness pass was rejected by the owner after playing. Its numeri
 
 **Owner-approved pull design:** dragging right pulls the right side of the dough toward the finger into a rounded teardrop; the opposite side stays close to its starting point. The plump region holds the readable face, with eyes tracking the actual finger and a cute effort expression. A quick recoil accompanies immediate launch, followed by two small decaying jiggles and delayed crest/feet. Apply the same local-shape behavior to vertical and diagonal drags; launch direction is opposite to the finger. Stretch is bounded and visual only. Reduced motion keeps directional feedback and clear state with smaller recoil. This replaces symmetric whole-bun width scaling as the held action.
 
+**Silhouette correction:** the owner accepted the interaction improvement but rejected the oval held shape. The anchored mass must remain round and wide, then narrow through a curved shoulder into a visibly thinner, rounded finger-facing tip. Extension alone is insufficient; cross-sections toward the tip must taper instead of expanding. Keep the face on the fuller mass. Review actual held silhouettes for all tiers, weak/strong input and horizontal/vertical/diagonal pulls before publication; a correct shader reference value alone does not establish the intended form.
+
 ### Current performance pass · shot to celebration
 
 The owner selected **45°** as the preferred default camera elevation. Reset returns to 45°; existing saved personal angles remain respected. The user can still adjust the view from 35–75° without changing physics.
