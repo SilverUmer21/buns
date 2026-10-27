@@ -31,6 +31,16 @@ Six-stage teaching sequence:
 
 ## Feedback and motion
 
+### Current performance pass · shot to celebration
+
+The owner selected **45°** as the preferred default camera elevation. Reset returns to 45°; existing saved personal angles remain respected. The user can still adjust the view from 35–75° without changing physics.
+
+Make the response a connected performance with distinct poses instead of one repeated bounce. Starting targets for iteration, not sourced measurements: (1) selection registers immediately; (2) dragging progressively loads a directional crouch/lean, with restrained elastic resistance and expressive eyes, mouth, crest and limbs; (3) release launches the solver on the same input event and flows from held pose to a directional stretch and soft recovery; (4) impacts compress along the contact direction and dissipate with small overlapping follow-through. A cancelled pull eases home and never launches. Weak and strong shots should be meaningfully different while the aim remains accurate.
+
+For a merge, make both inputs readable as they gather at their actual contact position; the next-tier friend appears with a tier-specific excited expression, pop and recovery. Avoid obscuring the face with rings or particles. Release the player's next shot as soon as physics allows, regardless of remaining decorative follow-through. For a win, make the escaped bun's personality visible through a staged joyful reaction, hop and landing before the result panel; completion, progression and Undo must be correct immediately and independent of the animation. Pause, reset and repeated simultaneous events must not leave ghost rigs or effects behind. Give reduced-motion players a clear result and essential state feedback with nonessential motion suppressed.
+
+Inspect actual browser sequences at 45° in portrait and desktop, using multiple held, release, merge and win frames, including an interrupted/cancelled hold. Check smooth changes without static poses, detached facial parts, flattening into a pancake, clipping at board edges or effects hiding the next action. Compare equivalent moments at 30/60/120 render schedules and run all existing deterministic puzzle solutions. User approval and physical-device touch/performance playtesting remain necessary. Keep the current palette; richer Clash-inspired color and shine remains a later separate study. Research: [animation direction](../research/animation-direction-2026-10.md).
+
 ### Current improvement pass: owner feedback and acceptance
 
 Pip's cream bun is the visual benchmark and should remain recognizable. Prioritize Berry and Mango proportions, crests, surface depth and facial appeal at actual in-game scale; their expressions and timing should feel related without looking like recolored statues. Compare real browser frames against Pip and the supplied screenshots, then iterate using editable geometry or a clearly documented non-destructive runtime treatment. Keep the established palette in this pass.
@@ -41,7 +51,7 @@ Merge feedback has a clear beginning, arrival and end: two matching buns respond
 
 #### Adjustable framing
 
-Provide an accessible angle control in pause/settings with a live preview, readable degrees and reset. Starting tuning range: **35–75° elevation** measured from the board plane; default restores the current view. Persist the choice locally and retain it between levels. Change only the camera, never the simulation plane. Disable adjustments while buns move or a pull is active; cancellation must not fire. Use orthographic framing that refits the full tray, gate and exit with a margin for portrait/desktop resize. Project the gate badge, cursor-to-plane aim, prediction and picking with the selected camera. Keep board and characters prominent while reserving safe margins for fingers, HUD and notches.
+Provide an accessible angle control in pause/settings with a live preview, readable degrees and reset. Tuning range: **35–75° elevation** measured from the board plane; default and reset are **45°** per the owner's selection. Persist an explicitly saved choice locally and retain it between levels. Change only the camera, never the simulation plane. Disable adjustments while buns move or a pull is active; cancellation must not fire. Use orthographic framing that refits the full tray, gate and exit with a margin for portrait/desktop resize. Project the gate badge, cursor-to-plane aim, prediction and picking with the selected camera. Keep board and characters prominent while reserving safe margins for fingers, HUD and notches.
 
 Acceptance: actual browser frames at default and angle limits on phone and desktop, with all board edges and aim/goal overlays visible; per-tier character views; weak/strong pull, opposite directions, release, impact, jelly, both merge tiers and escape. Verify finite positive scales and approximate volume, attached facial pieces, readable silhouettes, ray-plane round trips, safe touch targets and identical solver outcomes at 30/60/120 render schedules with wobble on/off. Final color and feel approval requires user and physical-device playtesting.
 

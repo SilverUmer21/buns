@@ -16,6 +16,16 @@ The active product direction is now the browser build in `web/`: six implemented
 
 ## Current owner-requested iteration
 
+### Shot-to-celebration pass
+
+1. Read and record primary animation and accessibility sources; distinguish research from Bunbreak-specific timing hypotheses. Set 45° as default/reset while preserving saved player choices and verify camera fit and aiming.
+2. Tune continuous, directional pull/cancel and immediate launch with soft connected pose transitions, volume compensation, expression and staggered crest/limb follow-through. Preserve solver state, collision boundaries and responsive input.
+3. Strengthen each tier's merge into an understandable gather, reveal and recovery; stage the escaping character's win through a joyful reaction, hop and landing without changing the timing of game-state completion or blocking recovery controls.
+4. Inspect multi-frame actual browser captures of weak/strong pulls, launch, both merge tiers and the entire win at portrait/desktop. Exercise cancellation, mute, reduced motion, pause/Undo/retry and 30/60/120 schedules; run all six puzzle fixtures. Iterate if the evidence exposes problems.
+5. Ship focused commits and update the live browser preview and download. Record what was really tested and explicitly leave physical-device feel and final subjective approval open. Reserve color/shine exploration for its own later pass.
+
+### Earlier camera and fruit pass
+
 1. **Research and GDD:** record sourced animation/camera findings, the owner's Pip benchmark and a precise plan. Mark Clash-inspired color/shine as a future study.
 2. **Camera and scale:** add a pause-menu elevation slider (initial 35–75°) with live preview, value, persistence and default reset; refit the full board across phone and desktop. Freeze/cancel safely during a held pull or moving shot; validate ray-plane mapping, aim/goal overlay and unchanged solver outcomes at extremes.
 3. **Character appeal:** preserve Pip, improve Berry/Mango's in-game shape, material depth, crest and expression; compare actual rendered close-up and gameplay views at phone size. Keep source/GLB editable or document any runtime shape change.
