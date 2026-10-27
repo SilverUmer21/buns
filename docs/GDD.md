@@ -31,6 +31,12 @@ Six-stage teaching sequence:
 
 ## Feedback and motion
 
+### Tactile rework after playtest rejection
+
+The previous smoothness pass was rejected by the owner after playing. Its numerical checks remain useful for correctness, but are not evidence of satisfying feel. The next implementation replaces a diagonal-cancelling squash approximation with properly oriented deformation, blocks noticeably different loaded/launch/recovery poses, adds facial responses and a visible elastic connection to the actual drag, and stages merge contact/compression/reveal/landing instead of simply shrinking both old buns. Preserve Pip's recognizable design, the 45° default and immediate fixed-plane physics. Review native phone frames and close-up before/after comparisons before updating the preview. [Research and concrete acceptance](../research/tactile-rework.md).
+
+**Owner-approved pull design:** dragging right pulls the right side of the dough toward the finger into a rounded teardrop; the opposite side stays close to its starting point. The plump region holds the readable face, with eyes tracking the actual finger and a cute effort expression. A quick recoil accompanies immediate launch, followed by two small decaying jiggles and delayed crest/feet. Apply the same local-shape behavior to vertical and diagonal drags; launch direction is opposite to the finger. Stretch is bounded and visual only. Reduced motion keeps directional feedback and clear state with smaller recoil. This replaces symmetric whole-bun width scaling as the held action.
+
 ### Current performance pass · shot to celebration
 
 The owner selected **45°** as the preferred default camera elevation. Reset returns to 45°; existing saved personal angles remain respected. The user can still adjust the view from 35–75° without changing physics.

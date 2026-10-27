@@ -16,6 +16,14 @@ The active product direction is now the browser build in `web/`: six implemented
 
 ## Current owner-requested iteration
 
+### Tactile rework
+
+1. Inspect rejected phone frames and current runtime; record the diagonal deformation defect and the weak silhouette/merge staging.
+2. Replace the deformation basis and create distinct loaded, launch and recovery poses; add expressive character reactions and a pointer-linked elastic cue.
+3. Replace shrink-away merging with readable contact, compressed new friend, reveal/hop and landing, without delaying physics or new actions.
+4. Capture and compare actual browser frames at native mobile size and close-up; check diagonal input, reversal, cancel, both tiers and reduced motion. Run the existing physics, flow and render-schedule checks.
+5. Push focused patches and evidence, publish the verified preview and refresh the HTTPS archive. The color/shine study remains deferred.
+
 ### Shot-to-celebration pass
 
 1. Read and record primary animation and accessibility sources; distinguish research from Bunbreak-specific timing hypotheses. Set 45° as default/reset while preserving saved player choices and verify camera fit and aiming.
