@@ -6,4 +6,6 @@ In the captured pull/release sequence, Pip's rig height moved from about 1.0 to 
 
 The browser test drove the in-game Show me replay to completion for each of the six stages. For speed, the full-level replay portion advanced the simulation without drawing every intermediate frame. The displayed pull/release frames were actually rendered. A separate real Chromium pass captured every stage on a phone-sized viewport: [1](level-1.png), [2](level-2.png), [3](level-3.png), [4](level-4.png), [5](level-5.png), [6](level-6.png). The automated physics suites separately passed 14 rules checks and 28 level/replay checks, including 30/60/120 render-schedule equivalence and an actual jelly collision.
 
+A separate Chromium progression test completed the first stage without demonstration mode, verified local completion storage, selected Next, checked that the next stage was unlocked and the following one locked, then reloaded and confirmed progress persisted.
+
 The earlier Godot screenshot clipped cream highlights and rendered the board neon cyan. The browser renderer uses a more restrained palette, neutral lighting, tone mapping and soft contact shadows. Physical-device performance, human playtests, final star thresholds, collision feel and comprehensive visual review of every event are still pending.
