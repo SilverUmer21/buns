@@ -39,6 +39,8 @@ jobs:
               result = json.loads(Path('reports', name + '.json').read_text())
               assert result['passed'], (name, result)
           PY
+      - name: Validate browser physics and six level solutions
+        run: node --test web/tests/*.test.mjs
       - name: Retain validation evidence
         if: always()
         uses: actions/upload-artifact@v4

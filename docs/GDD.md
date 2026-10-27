@@ -1,6 +1,6 @@
 # Bunbreak · Sunshine Kitchen
 
-Status: living design, 2026-10-27. Engine: Godot 4.6.3 Standard with Compatibility rendering; Blender 4.3.2 authoring and GLB assets. Audience: broad; no age group inferred from bright colors. The original prototype source was not supplied, so the current solver is a new implementation of the handoff rules.
+Status: living design, 2026-10-27. Active game: browser and Three.js WebGL with Blender 4.3.2 authoring and GLB assets; the earlier Godot 4.6.3 project is retained as a reference. Audience: broad; no age group inferred from colors. The original prototype source was not supplied, so the current solver is a new implementation of the handoff rules.
 
 ## Player promise
 
@@ -16,7 +16,7 @@ Mouse and touch use the same select/pull/hold/release interaction. The bun holds
 
 Title → Play → aim/resolve → escape celebration → result → replay/trail. Pause is a small overlay with recovery and settings. Gameplay uses a board-first composition, a small stage/shot marker, compact Undo and pause; remove the existing recipe and marketing side columns. The plate and wafer tier emblem communicate the objective in the world. A short contextual cue teaches the first drag and then gets out of the way.
 
-The current implemented puzzle is **The big escape**: four Pips, one jelly, one Mango gate, one exit. A trail must distinguish this playable slice from the five planned puzzles. Upcoming stages cannot masquerade as completed content. Next appears only when another solved, implemented stage exists.
+The browser game contains six solver-verified puzzles, including **The big escape**: four Pips, one jelly, one Mango gate, one exit. The trail unlocks stages in sequence and saves progress locally. Each Next action opens an implemented stage; mastery targets remain provisional until human playtesting.
 
 Planned six-stage teaching sequence:
 
@@ -51,7 +51,7 @@ Fixed planar physics runs at 120 Hz with four collision substeps. The visual spr
 
 Functional: clean Godot import; complete actual physics solution; reproducible 30/60/120 render-schedule outcomes; fast collisions; unequal/max-tier contacts; repeated/simultaneous merges; slow gate eligibility; aiming/cancellation; Undo/reset/pause and save/flow regressions.
 
-Visual: actual in-engine captures of phone/desktop compositions and held/weak/strong/impact/merge/escape motion. Readable faces at small scale; no effects over an active aim; clear result and recovery controls; usable touch targets. Measure safe areas and rendering performance on a physical inexpensive Android device before declaring phone readiness.
+Visual: actual browser captures of phone/desktop compositions and held/weak/strong/impact/merge/escape motion. Readable faces at small scale; no effects over an active aim; clear result and recovery controls; usable touch targets. Measure safe areas and rendering performance on a physical inexpensive Android device before declaring phone readiness.
 
 Delivery: editable sources, GLBs, Godot project, real captured media, verified downloadable archives, Android debug build when exported and signed successfully, plus explicit pending-device notes. An exported APK or passing headless check alone is not a completed playtest.
 

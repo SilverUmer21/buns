@@ -2,7 +2,7 @@
 
 ## Start every task
 
-1. Read this file, `docs/GDD.md`, `docs/PLAN.md`, the latest validation reports and the current source before editing. Inspect `git status`; preserve others' work.
+1. Read this file, `docs/GDD.md`, `docs/PLAN.md`, the latest validation reports and the current source before editing. The active playable game is `web/dist/`; the Godot project remains an earlier reference. Inspect `git status`; preserve others' work.
 2. Identify the player-visible problem and a small patch that fixes it. Research the relevant game design or engine behavior first. Open primary sources, actual store listings/screenshots or first-party documentation; record citations and separate observed evidence from design inference in `research/`. Never claim to have played a game when only reading its listing.
 3. Tell the owner what you are doing. Continue useful independent work while a tool, download or optional answer is pending. Do not repeatedly request authorization already granted in the conversation.
 4. Establish what is implemented and tested today. Do not present a concept image, Blender still, headless test, simulated frame rate or unrun export as a rendered/playtested game or physical-device evidence.
@@ -33,6 +33,6 @@
 
 - Run `godot --headless --editor --path godot --import` on a clean checkout, then the gameplay, motion and flow suites present under `godot/tests/`.
 - Verify fixed-step replays across 30/60/120 render schedules; repeated and simultaneous contacts; merges; maximum-speed collisions; slow matching-tier gate contact; held pull; touch cancellation/focus loss; pause; Undo across merges/wins; Retry; saved progress and scene transitions.
-- Review actual Godot footage and portrait/desktop captures. Inspect weak/strong release, held squash, oblique impacts, jelly, merge and escape. Keep report claims bounded to evidence.
+- Run `node --test web/tests/*.test.mjs`. Review actual browser frames at portrait and desktop sizes. Inspect weak/strong release, held squash, oblique impacts, jelly, merge and escape. Check that the rendered board is present after resizing. Keep report claims bounded to evidence.
 - Build/sign/package checks complement actual Android device tests. Do not claim phone performance, touch feel, safe-area correctness or a target frame rate from headless desktop tests.
 - Every handoff should give usable HTTPS download links, the Godot version/run steps, current test results and any concrete remaining limitations. Verify links and archive checksums; workspace file links alone are not sufficient for this owner.

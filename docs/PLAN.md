@@ -12,6 +12,6 @@ Research precedes design/code decisions. Continue from the existing playable sli
 | 06 · platform review | Actual Godot screenshots/movie, signed Android APK and downloadable project | Export/signature/package verification; physical device review stated separately |
 | 07 · content expansion | The other five puzzles, one at a time | Each gets a real solver fixture, fair provisional star targets and playtesting |
 
-The current pass implements and reviews patches 01–06 as tooling permits; patch 07 remains staged work, not a claim that six puzzles are already playable. Each commit records its behavior and validation. Optional stars, motion amplitude and sound need human playtesting; source research cannot establish their final tuning.
+The active product direction is now the browser build in `web/`: six implemented puzzles, WebGL assets and motion, responsive layout, local progress, and captured browser frames. The previous Godot project and its checks remain as historical reference. Each patch records its behavior and validation. Optional stars, motion amplitude and sound need human playtesting; solver results and source research cannot establish their final tuning.
 
 Stop conditions: permission pending, failed export, unsupported device/rendering setup or a missing solved fixture must be stated precisely. Save logs/checkpoints and continue independent work. Never wait indefinitely on a shell command or label an unexecuted job successful.
