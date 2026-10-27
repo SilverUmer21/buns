@@ -94,7 +94,7 @@ class DoughMotion {
     this.reactionAge += dt;
     for (let axis = 0; axis < 2; axis++) {
       const pullTarget = this.held ? this.direction[axis] * this.strength : 0;
-      [this.pull[axis], this.pullVelocity[axis]] = spring(this.pull[axis], this.pullVelocity[axis], pullTarget, 11, 1, dt);
+      [this.pull[axis], this.pullVelocity[axis]] = spring(this.pull[axis], this.pullVelocity[axis], pullTarget, 4.5, 1, dt);
     }
     const pullAmount = Math.min(1, Math.hypot(...this.pull));
     if (this.held && pullAmount > 0.005) this.squashDirection = this.pull.map(value => value / pullAmount);
@@ -103,7 +103,7 @@ class DoughMotion {
     // along the drag as the player loads the shot. The physics stays still.
     let target = this.held ? 1 - (this.reduced ? 0.08 * pullAmount : 0.025 + 0.15 * pullAmount) : 1 + (this.reduced ? 0 : 0.012) * Math.sin(this.clock * 2.4 + this.phase);
     if (this.returning) target = 1;
-    [this.height, this.hv] = spring(this.height, this.hv, target, tracking ? 8 : 4.4, tracking ? 1 : 0.34, dt);
+    [this.height, this.hv] = spring(this.height, this.hv, target, tracking ? 5.5 : 4.4, tracking ? 1 : 0.34, dt);
     if (this.height < 0.72 || this.height > 1.16) {
       this.height = THREE.MathUtils.clamp(this.height, 0.72, 1.16);
       this.hv *= -0.15;
@@ -111,7 +111,7 @@ class DoughMotion {
     for (let axis = 0; axis < 2; axis++) {
       const idleLean = this.reduced ? 0 : 0.010 * Math.sin(this.clock * 1.45 + this.phase + axis * 1.3);
       const leanTarget = this.held ? -this.pull[axis] * (this.reduced ? 0.025 : 0.17) : idleLean;
-      [this.lean[axis], this.lv[axis]] = spring(this.lean[axis], this.lv[axis], leanTarget, tracking ? 8 : 4.4, tracking ? 1 : 0.4, dt);
+      [this.lean[axis], this.lv[axis]] = spring(this.lean[axis], this.lv[axis], leanTarget, tracking ? 5.5 : 4.4, tracking ? 1 : 0.4, dt);
       this.lean[axis] = THREE.MathUtils.clamp(this.lean[axis], -0.18, 0.18);
       const crestTarget = this.reduced ? 0 : -this.lean[axis] * 1.25 + (axis ? (1 - this.height) * 0.28 : 0);
       [this.crest[axis], this.cv[axis]] = spring(this.crest[axis], this.cv[axis], crestTarget, 5.2, this.returning ? 0.7 : 0.3, dt);
@@ -120,13 +120,13 @@ class DoughMotion {
       [this.limb[axis], this.limbv[axis]] = spring(this.limb[axis], this.limbv[axis], limbTarget, 3.7, this.returning ? 0.7 : 0.34, dt);
       this.limb[axis] = THREE.MathUtils.clamp(this.limb[axis], -0.22, 0.22);
       const offsetTarget = this.held ? -this.pull[axis] * (this.reduced ? 0.06 : 0.20) : 0;
-      [this.offset[axis], this.ov[axis]] = spring(this.offset[axis], this.ov[axis], offsetTarget, tracking ? 8 : 6.5, tracking ? 1 : 0.5, dt);
+      [this.offset[axis], this.ov[axis]] = spring(this.offset[axis], this.ov[axis], offsetTarget, tracking ? 5.5 : 6.5, tracking ? 1 : 0.5, dt);
     }
     const squeezeTarget = this.held && !this.reduced ? -this.pull[0] * 0.025 : 0;
     [this.squeeze, this.sv] = spring(this.squeeze, this.sv, squeezeTarget, 5, tracking ? 0.8 : 0.35, dt);
     this.squeeze = THREE.MathUtils.clamp(this.squeeze, -0.065, 0.065);
     const directionalTarget = this.held && !this.reduced ? -0.14 * pullAmount : 0;
-    [this.directional, this.directionalVelocity] = spring(this.directional, this.directionalVelocity, directionalTarget, tracking ? 8 : 4.7, tracking ? 1 : 0.40, dt);
+    [this.directional, this.directionalVelocity] = spring(this.directional, this.directionalVelocity, directionalTarget, tracking ? 5.5 : 4.7, tracking ? 1 : 0.40, dt);
     this.directional = THREE.MathUtils.clamp(this.directional, -0.13, 0.16);
     const expressionTarget = this.held && !this.reduced ? 0.08 + 0.30 * pullAmount : 0;
     [this.expression, this.expressionVelocity] = spring(this.expression, this.expressionVelocity, expressionTarget, tracking ? 7 : 4.8, tracking ? 1 : 0.45, dt);
