@@ -6,7 +6,7 @@ import { clone } from 'three/addons/utils/SkeletonUtils.js';
 const FLOOR = 0.215;
 const STEP = 1 / 240;
 const RADII = [0, 0.55, 0.65, 0.77];
-const SIZES = [0, 0.76, 0.90, 1.00];
+const SIZES = [0, 0.82, 0.94, 1.05];
 const TEMP = new THREE.Vector3();
 const EULER = new THREE.Euler();
 const ROTATION = new THREE.Quaternion();
@@ -411,6 +411,16 @@ export async function createView(canvas) {
     for (const entry of entries.values()) { entry.motion.reduced = reduced; if (reduced) { entry.motion.hv = entry.motion.sv = 0; entry.motion.lv.fill(0); } }
     if (reduced) { for (const {mesh} of crumbs) scene.remove(mesh); crumbs.length = 0; jelly.scale.setScalar(1); }
   }
+  function configureLevel(level) {
+    const bumper = level.bumpers[0];
+    jelly.visible = !!bumper;
+    if (bumper) jelly.position.set(bumper.position.x, FLOOR, -bumper.position.y);
+  }
+  function setGateOpen(value) {
+    gateOpen = !!value;
+    gateAge = gateOpen ? 1 : 0;
+    if (wafer) wafer.visible = !gateOpen;
+  }
   function inspect() {
     return {renderer: 'Three.js WebGL / real GLB meshes', exposure: renderer.toneMappingExposure,
       gateOpen, aimed, reducedMotion: reduced, count: entries.size,
@@ -423,7 +433,7 @@ export async function createView(canvas) {
   const observer = new ResizeObserver(resize); observer.observe(canvas);
   window.addEventListener('resize', resize);
   return {setBuns, syncEvents, aim, cancelAim, resize, render, worldFromScreen, screenFromWorld,
-    pickBun, reset, setReducedMotion, inspect, debug: inspect,
+    pickBun, reset, configureLevel, setGateOpen, setReducedMotion, inspect, debug: inspect,
     capture: () => { renderer.render(scene, camera); return canvas.toDataURL('image/png'); },
     dispose: () => { observer.disconnect(); window.removeEventListener('resize', resize); reset(); renderer.dispose(); }};
 }

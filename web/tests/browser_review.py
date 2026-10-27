@@ -19,6 +19,7 @@ async def main():
         await page.screenshot(path=str(OUT/'01-title.png'))
         await page.get_by_role('button',name='Play',exact=True).click()
         await page.evaluate('window.__bunbreak.freeze()')
+        await page.evaluate('window.__bunbreak.chooseLevel(4)')
         await page.evaluate('window.__bunbreak.advance(1/60)')
         await page.screenshot(path=str(OUT/'02-play.png'))
         pos=await page.evaluate('window.__bunbreak.screenFor(1)')
@@ -47,6 +48,9 @@ async def main():
         await page.wait_for_timeout(350)
         await page.screenshot(path=str(OUT/'06-result.png'))
         assert state['won'] and state['flow']=='result',state
+        for level_index in range(6):
+            state = await page.evaluate('''i => { window.__bunbreak.chooseLevel(i);window.__bunbreak.showMe(); for(let f=0;f<1500;f++){window.__bunbreak.advance(1/30,false);if(window.__bunbreak.inspect().flow==='result')break;} return window.__bunbreak.inspect(); }''', level_index)
+            assert state['won'] and state['flow']=='result' and state['levelIndex']==level_index, (level_index,state)
         await page.set_viewport_size({'width':390,'height':844})
         await page.wait_for_timeout(300)
         await page.evaluate('window.__bunbreak.start();window.__bunbreak.advance(1/60)')
