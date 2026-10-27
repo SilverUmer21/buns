@@ -4,3 +4,14 @@
 .pause-glyph{display:inline-block;width:13px;height:17px;border-left:4px solid currentColor;border-right:4px solid currentColor;vertical-align:middle}
 
 #gate-badge{position:absolute;transform:translate(-50%,-90%);pointer-events:none;padding:4px 10px;border-radius:20px;border:2px solid #e8dbbb;background:#e7d7b5;color:#68543c;font:800 10px BunTitle,sans-serif;letter-spacing:.7px;box-shadow:0 2px 0 #ae896750}#gate-badge[data-tier="2"]{background:#e7a6b1}#gate-badge[data-tier="3"]{background:#e7c778}
+#overlay.pause .card{max-height:92dvh;overflow-y:auto}
+#overlay.camera{align-items:flex-end;justify-content:center;padding:0 16px max(20px,env(safe-area-inset-bottom));background:transparent;backdrop-filter:none;pointer-events:none}
+#overlay.camera .card{pointer-events:auto;width:min(380px,94vw);padding:15px 22px;max-height:45dvh;overflow-y:auto}
+#overlay.camera h1{font-size:24px;margin:2px 0}
+#overlay.camera .card p{margin:2px 0 8px;font-size:12px}
+.camera-control{display:flex;flex-direction:column;gap:5px;align-items:stretch;min-height:48px;text-align:left;font-size:13px;color:#34544b}
+.camera-control input{width:100%;height:32px;accent-color:#b27e3e;cursor:pointer;touch-action:pan-x}
+#overlay.camera #actions{gap:5px}#overlay.camera #actions button{min-height:42px;padding:6px}
+#overlay.camera .card small,#overlay.camera #message,#overlay.camera #footnote:empty{display:none}
+#overlay.camera #actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#overlay.camera .camera-control{grid-column:1 / -1}
