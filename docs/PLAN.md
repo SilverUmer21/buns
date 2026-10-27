@@ -14,4 +14,15 @@ Research precedes design/code decisions. Continue from the existing playable sli
 
 The active product direction is now the browser build in `web/`: six implemented puzzles, WebGL assets and motion, responsive layout, local progress, and captured browser frames. The previous Godot project and its checks remain as historical reference. Each patch records its behavior and validation. Optional stars, motion amplitude and sound need human playtesting; solver results and source research cannot establish their final tuning.
 
+## Current owner-requested iteration
+
+1. **Research and GDD:** record sourced animation/camera findings, the owner's Pip benchmark and a precise plan. Mark Clash-inspired color/shine as a future study.
+2. **Camera and scale:** add a pause-menu elevation slider (initial 35–75°) with live preview, value, persistence and default reset; refit the full board across phone and desktop. Freeze/cancel safely during a held pull or moving shot; validate ray-plane mapping, aim/goal overlay and unchanged solver outcomes at extremes.
+3. **Character appeal:** preserve Pip, improve Berry/Mango's in-game shape, material depth, crest and expression; compare actual rendered close-up and gameplay views at phone size. Keep source/GLB editable or document any runtime shape change.
+4. **Interactive motion:** make pull, release, impacts and cancel directional, expressive and time-consistent, combining volume-preserving body deformation with asymmetric lean and staggered limb/crest behavior. Keep face registration and colliders stable. Capture real frames rather than trusting stills or unit checks alone.
+5. **Interaction feedback:** improve both merge tiers, jelly, gate and escape with staged, restrained visual/audio/character reactions; respect mute/reduced motion and simultaneous-contact correctness. Maintain responsive launch and deterministic physics.
+6. **Verification and handoff:** run six solution fixtures and event/undo/pause tests at 30/60/120 render schedules; capture multiple angles and all event sequences in Chromium; test portrait/desktop, camera persistence and pointer mapping. Push small logical commits, update browser preview/download, and disclose pending physical-phone testing and subjective user review.
+
+Deferred: a Clash-inspired material/color/shine study comes later, not as an unsolicited palette change in this patch.
+
 Stop conditions: permission pending, failed export, unsupported device/rendering setup or a missing solved fixture must be stated precisely. Save logs/checkpoints and continue independent work. Never wait indefinitely on a shell command or label an unexecuted job successful.
