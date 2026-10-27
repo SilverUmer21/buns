@@ -15,3 +15,14 @@
 #overlay.camera .card small,#overlay.camera #message,#overlay.camera #footnote:empty{display:none}
 #overlay.camera #actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 #overlay.camera .camera-control{grid-column:1 / -1}
+
+/* Keep all controls within the usable screen, including phone cutouts and
+   landscape gesture areas. The camera slider and buttons need finger-sized
+   hit areas even though their visible tracks and icons are smaller. */
+#hud{left:max(calc(16px + env(safe-area-inset-left)),calc((100vw - 560px)/2));right:max(calc(16px + env(safe-area-inset-right)),calc((100vw - 560px)/2))}
+#stage{left:calc(50% + (env(safe-area-inset-left) - env(safe-area-inset-right))/2);width:min(98vw,calc(100vw - 2 * 6px - env(safe-area-inset-left) - env(safe-area-inset-right)),calc((100dvh - 126px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * .73))}
+#overlay{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+#overlay.camera{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+#overlay.camera #actions button{min-height:48px}
+.camera-control input{height:48px}
+@media(max-height:600px)and(min-width:650px){#stage{width:min(calc(100vw - 2 * 6px - env(safe-area-inset-left) - env(safe-area-inset-right)),calc((100dvh - 80px)*.73))}#hud{left:max(calc(18px + env(safe-area-inset-left)),calc((100vw - 540px)/2));right:max(calc(18px + env(safe-area-inset-right)),calc((100vw - 540px)/2))}}
