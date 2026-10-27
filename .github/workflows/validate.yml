@@ -31,6 +31,9 @@ jobs:
           for suite in validate_game validate_motion validate_flow; do
             timeout 45 Godot_v4.6.3-stable_linux.x86_64 --headless --path godot --script tests/$suite.gd
           done
+          set -o pipefail
+          timeout 45 Godot_v4.6.3-stable_linux.x86_64 --headless --path godot --script tests/validate_fruit_assets.gd | tee /tmp/fruit-check.log
+          grep -F 'FRUIT ASSET RUNTIME PASS' /tmp/fruit-check.log
           python3 authoring/validate_glb.py
           python3 - <<'PY'
           import json

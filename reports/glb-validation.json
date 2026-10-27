@@ -2,8 +2,8 @@
   "passed": true,
   "assets": {
     "berry": {
-      "bytes": 474496,
-      "triangles": 7748,
+      "bytes": 528640,
+      "triangles": 8692,
       "mesh_nodes": 8,
       "materials": 7,
       "animations": [
@@ -18,8 +18,8 @@
       ]
     },
     "mango": {
-      "bytes": 489124,
-      "triangles": 8188,
+      "bytes": 525624,
+      "triangles": 8692,
       "mesh_nodes": 8,
       "materials": 7,
       "animations": [

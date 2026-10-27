@@ -189,8 +189,12 @@ def face_surface(kind, x, z):
     if kind == 'pip':
         r = pip_radius(z)
         return -.84 * math.sqrt(max(.005, r * r - x * x))
-    sx, sy, sz, cz = ((.72, .62, .65, .83) if kind == 'berry' else (.77, .66, .69, .87))
-    return -sy * math.sqrt(max(.005, 1 - (x / sx) ** 2 - ((z - cz) / sz) ** 2))
+    sx, sy, sz, cz, taper = ((.72, .62, .65, .83, .085) if kind == 'berry'
+                              else (.77, .66, .69, .87, .055))
+    nz = (z - cz) / sz
+    fullness = 1 - taper * nz
+    # The facial inlays follow the same gently tapered dough surface as the body.
+    return -sy * fullness * math.sqrt(max(.005, 1 - (x / (sx * fullness)) ** 2 - nz ** 2))
 
 
 def face_patch(name, coords, mat, kind, parent, offset=.014):
@@ -404,22 +408,28 @@ def character(kind):
     else:
         dims = (.72, .62, .65) if kind == 'berry' else (.77, .66, .69)
         center = (0, 0, .83 if kind == 'berry' else .87)
+        taper = .085 if kind == 'berry' else .055
         # Baked dimensions keep body morphs in the same world-space convention as Pip.
-        body = uv(title + '_dough', (0, 0, 0), (1, 1, 1), color, root, seg=40, rings=24)
+        body = uv(title + '_dough', (0, 0, 0), (1, 1, 1), color, root, seg=48, rings=30)
         for v in body.data.vertices:
-            v.co = Vector((v.co.x * dims[0], v.co.y * dims[1], v.co.z * dims[2] + center[2]))
-        count = 3 if kind == 'berry' else 4
+            nz = v.co.z
+            fullness = 1 - taper * nz
+            v.co = Vector((v.co.x * dims[0] * fullness, v.co.y * dims[1] * fullness,
+                           nz * dims[2] + center[2]))
+        # Both fruit buns use three soft lobes, but Berry has cream leaf-like
+        # petals while Mango has broader, golden rounded crown lobes.
+        count = 3
         for i in range(count):
             if kind == 'berry':
-                x, z, lean = [(-.16, 1.48, -.55), (0, 1.55, .05), (.16, 1.48, .55)][i]
-                ob = uv(title + '_cream_petal_' + str(i + 1), (x, .0, z), (.105, .105, .185),
+                x, z, lean = [(-.15, 1.44, -.56), (0, 1.51, .03), (.15, 1.44, .56)][i]
+                ob = uv(title + '_cream_petal_' + str(i + 1), (x, .0, z), (.11, .10, .19),
                         MATS['Warm dough'], root, seg=20, rings=12, rotation=(0, lean, 0))
             else:
-                x = (i - 1.5) * .16
-                z = 1.51 + (.07 if i in (1, 2) else .0)
-                ob = uv(title + '_crown_lobe_' + str(i + 1), (x, .01, z), (.13, .12, .19),
+                x = (i - 1) * .18
+                z = 1.51 + (.07 if i == 1 else .0)
+                ob = uv(title + '_crown_lobe_' + str(i + 1), (x, .01, z), (.145, .13, .195),
                         MATS['Golden crest'], root, seg=20, rings=12,
-                        rotation=(0, (i - 1.5) * .22, 0))
+                        rotation=(0, (i - 1) * .32, 0))
             parts.append((ob, 'Crest'))
     parts.append((body, 'Body'))
     width = {'pip': .73, 'berry': .74, 'mango': .79}[kind]
@@ -430,40 +440,42 @@ def character(kind):
                   root, seg=20, rings=12)
         parts.extend([(arm, 'Arm.' + label), (foot, 'Foot.' + label)])
     eyes = {}
+    face_lift = {'pip': 0.0, 'berry': .065, 'mango': .085}[kind]
+    face_scale = {'pip': 1.0, 'berry': 1.14, 'mango': 1.20}[kind]
     for label, sign in [('L', -1), ('R', 1)]:
-        x, z = sign * .217, .865
+        x, z = sign * .217 * face_scale, .865 + face_lift
         y = face_surface(kind, x, z) - .022
         eyes[label] = (x, y, z)
         angle = sign * .30
-        eye = uv(title + '_chocolate_eye_' + label, (x, y, z), (.057, .037, .081), MATS['Chocolate'],
+        eye = uv(title + '_chocolate_eye_' + label, (x, y, z), (.057 * face_scale, .037, .081 * face_scale), MATS['Chocolate'],
                  root, seg=24, rings=14, rotation=(0, 0, angle))
-        gleam = uv(title + '_eye_glint_' + label, (x - .016, y - .033, z + .026),
-                   (.015, .008, .020), MATS['Eye light'], root, seg=12, rings=8)
-        small = uv(title + '_eye_glint_small_' + label, (x + .016, y - .032, z - .027),
-                   (.007, .006, .009), MATS['Eye light'], root, seg=10, rings=6)
+        gleam = uv(title + '_eye_glint_' + label, (x - .016 * face_scale, y - .033, z + .026 * face_scale),
+                   (.015 * face_scale, .008, .020 * face_scale), MATS['Eye light'], root, seg=12, rings=8)
+        small = uv(title + '_eye_glint_small_' + label, (x + .016 * face_scale, y - .032, z - .027 * face_scale),
+                   (.007 * face_scale, .006, .009 * face_scale), MATS['Eye light'], root, seg=10, rings=6)
         parts.extend([(eye, 'Eye.' + label), (gleam, 'Eye.' + label), (small, 'Eye.' + label)])
         lidpoints = []
         for i in range(13):
-            xx = x - .054 + .108 * i / 12
-            zz = z - .012 + .036 * math.sin(PI * i / 12)
+            xx = x - .054 * face_scale + .108 * face_scale * i / 12
+            zz = z - .012 * face_scale + .036 * face_scale * math.sin(PI * i / 12)
             lidpoints.append((xx, face_surface(kind, xx, zz) - .030, zz))
         lid = tube(title + '_closed_eye_' + label, lidpoints, .012, MATS['Chocolate'], root, sides=6)
         parts.append((lid, 'Lid.' + label))
-        cx, cz = sign * .395, .705
-        cheek = [(cx + .087 * math.cos(2 * PI * i / 32), cz + .078 * math.sin(2 * PI * i / 32))
+        cx, cz = sign * .395 * face_scale, .705 + face_lift
+        cheek = [(cx + .087 * face_scale * math.cos(2 * PI * i / 32), cz + .078 * face_scale * math.sin(2 * PI * i / 32))
                  for i in range(32)]
         parts.append((face_patch(title + '_blush_' + label, cheek, cheekmat, kind, root, .019), 'Body'))
     # A broad open U-shaped smile and a pink tongue inset, both modeled geometry.
-    w, z = .165, .765
-    outline = [(-w + 2 * w * i / 24, z + .022 * ((-w + 2 * w * i / 24) / w) ** 2) for i in range(25)]
-    outline += [(w * math.cos(PI * i / 24), z - .157 * math.sin(PI * i / 24)) for i in range(1, 24)]
+    w, z = .165 * face_scale, .765 + face_lift
+    outline = [(-w + 2 * w * i / 24, z + .022 * face_scale * ((-w + 2 * w * i / 24) / w) ** 2) for i in range(25)]
+    outline += [(w * math.cos(PI * i / 24), z - .157 * face_scale * math.sin(PI * i / 24)) for i in range(1, 24)]
     parts.append((face_patch(title + '_smile', outline, MATS['Mouth cocoa'], kind, root, .028), 'Body'))
-    tongue = [(.090 * math.cos(2 * PI * i / 36), .651 + .040 * math.sin(2 * PI * i / 36)) for i in range(36)]
+    tongue = [(.090 * face_scale * math.cos(2 * PI * i / 36), z - .114 * face_scale + .040 * face_scale * math.sin(2 * PI * i / 36)) for i in range(36)]
     parts.append((face_patch(title + '_tongue', tongue, MATS['Tongue'], kind, root, .044), 'Body'))
     rig_character(kind, root, parts, body, eyes)
     root['tier'] = {'pip': 1, 'berry': 2, 'mango': 3}[kind]
     root['silhouette'] = {'pip': 'Seven folded dough pleats', 'berry': 'Three cream petals',
-                          'mango': 'Four golden crown lobes'}[kind]
+                          'mango': 'Three golden crown lobes'}[kind]
     return root
 
 
