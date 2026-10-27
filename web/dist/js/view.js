@@ -307,6 +307,11 @@ export async function createView(canvas) {
       scene.remove(entry.group, entry.shadow); entry.mixer.stopAllAction(); entry.shadow.material.dispose();
       for (const shape of entry.mouthShapes) shape.geometry.dispose();
       entry.localizedPull.dispose();
+      // SkeletonUtils creates per-character skeletons. Their GPU bone textures
+      // are not released by removing the mesh or disposing its material.
+      const skeletons = new Set();
+      entry.model.traverse(mesh => { if (mesh.isSkinnedMesh) skeletons.add(mesh.skeleton); });
+      for (const skeleton of skeletons) skeleton.dispose();
     } else { departing.push({entry, age: 0}); }
   }
   function setBuns(buns, alpha = 1) {
@@ -585,6 +590,7 @@ export async function createView(canvas) {
         fingerSide: samplePullDeformation(edge(1), axis, amount, center)};
     };
     return {renderer: 'Three.js WebGL / real GLB meshes', exposure: renderer.toneMappingExposure, cameraAngle,
+      resources: {geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures, programs: renderer.info.programs.length},
       gateOpen, aimed, reducedMotion: reduced, count: entries.size,
       buns: [...entries.values()].map(entry => ({id: entry.id, tier: entry.tier, height: entry.motion.height,
         held: entry.motion.held, offset: {x: entry.motion.offset[0], y: entry.motion.offset[1]},
