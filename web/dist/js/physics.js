@@ -66,12 +66,13 @@ export class Solver {
   }
 
   snapshot() {
-    return copy({ buns: this.buns, nextId: this.nextId, gateOpen: this.gateOpen, won: this.won,
+    return copy({ level: this.level, buns: this.buns, nextId: this.nextId, gateOpen: this.gateOpen, won: this.won,
       shots: this.shots, ticks: this.ticks });
   }
 
   restore(state) {
     const data = copy(state);
+    if (data.level) this.level = data.level;
     this.buns = data.buns;
     this.nextId = data.nextId;
     this.gateOpen = data.gateOpen;
