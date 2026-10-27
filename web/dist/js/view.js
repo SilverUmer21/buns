@@ -4,7 +4,7 @@ import { clone } from 'three/addons/utils/SkeletonUtils.js';
 import {CAMERA_DEFAULT, clampCameraAngle, fitBoardCamera} from './camera.js?v=motion3';
 import {makeDoughRelief, applyFruitDoughRelief} from './dough_surface.js';
 import {prepareFaceExpression, applyFaceExpression} from './face_expression.js?v=anchored4';
-import {createLocalizedPull, samplePullDeformation} from './localized_pull.js?v=anchored4';
+import {createLocalizedPull, samplePullDeformation} from './localized_pull.js?v=teardrop5';
 import {mergePose, mergeDeparture, escapePose, createEventEffects} from './event_animation.js?v=anchored4';
 
 // The solver owns positions. This file owns only the camera, art and soft motion.

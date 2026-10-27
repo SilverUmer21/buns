@@ -1,5 +1,5 @@
 import {Solver, STEP, RADII, MAX_SPEED, SOLUTION} from './physics.js';
-import {createView} from './view.js?v=anchored4';
+import {createView} from './view.js?v=teardrop5';
 import {LEVELS, applyLevel} from './levels.js';
 import {CAMERA_DEFAULT, CAMERA_MIN, CAMERA_MAX, clampCameraAngle} from './camera.js?v=motion3';
 const $=s=>document.querySelector(s), canvas=$('#world'), layer=$('#aim'), ctx=layer.getContext('2d');
