@@ -4,7 +4,7 @@ A bright 3D flick-and-merge puzzle. Pick a round little bun, pull backwards, hol
 
 ## Play in your browser
 
-[Open the Bunbreak browser preview](https://bunbreak-wobble-kitchen.sunlitbun1.chatgpt.site). The preview is private to the project owner. Select a bun, pull backwards, and release. Pause gives access to Undo, Retry, Show me, sound and reduced motion. The kitchen trail contains six puzzles and saves progress locally.
+[Open the Bunbreak browser preview](https://bunbreak-wobble-kitchen.sunlitbun1.chatgpt.site). The preview is private to the project owner. Select a bun, pull backwards, and release. Undo is on the playfield; Pause contains Retry, Show me, sound and reduced motion. The kitchen trail contains six puzzles and saves progress locally.
 
 To run the web game locally, use `cd web && npm run serve`, then open `http://localhost:4173` in a WebGL-capable browser. `node --test web/tests/*.test.mjs` runs its physics and level tests. All six stages have actual physics solution fixtures; star thresholds remain provisional pending human playtesting.
 
