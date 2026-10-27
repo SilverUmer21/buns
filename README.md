@@ -6,6 +6,8 @@ A bright 3D flick-and-merge puzzle. Pick a round little bun, pull backwards, hol
 
 [Open the Bunbreak browser preview](https://bunbreak-wobble-kitchen.sunlitbun1.chatgpt.site). The preview is private to the project owner. Select a bun, pull backwards, and release. Undo is on the playfield; Pause contains Retry, Show me, sound and reduced motion. The kitchen trail contains six puzzles and saves progress locally.
 
+To choose your view, let the buns settle, open **Pause → Adjust board angle**, and move the slider. The preview updates as you drag; **Reset angle** returns to 52°. Select **Done → Keep playing**. Your chosen angle is saved locally and can be changed between shots.
+
 To run the web game locally, use `cd web && npm run serve`, then open `http://localhost:4173` in a WebGL-capable browser. `node --test web/tests/*.test.mjs` runs its physics and level tests. All six stages have actual physics solution fixtures; star thresholds remain provisional pending human playtesting.
 
 ## Earlier Godot downloads
@@ -20,6 +22,7 @@ The Godot downloads are earlier single-level snapshots. Active web development, 
 ## What changed
 
 - Round cream, strawberry and mango buns with eight named clips each and editable 11-bone rigs.
+- Pip's original asset is unchanged; Berry and Mango have rebuilt, more readable faces and crests, plus a gentle procedural dough surface in the browser.
 - Directional jiggle, smooth held squash/cancel, and delayed crest/limb follow-through. Visual spring updates agree across 30/60/120 render schedules; collision shapes remain stable.
 - A title with Play, board-first HUD, pause settings, earned wafer stars, result/replay and an honest kitchen trail. Recipe/marketing panels are removed from play.
 - Undo, Retry, actual-physics aiming, a verified Show me solution, mute, reduced motion and local progress/settings. Demonstrations award no completion rewards.
