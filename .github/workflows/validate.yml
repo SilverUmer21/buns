@@ -70,6 +70,7 @@ jobs:
           timeout 180 python3 web/tests/recovery_browser.py
           timeout 600 python3 web/tests/animation_sequence.py
           timeout 300 python3 web/tests/tactile_review.py after
+          timeout 300 python3 web/tests/teardrop_review.py after
       - name: Retain actual rendered animation frames
         if: always()
         uses: actions/upload-artifact@v4
@@ -78,4 +79,5 @@ jobs:
           path: |
             reports/animation-sequence/
             reports/tactile-review/after/
+            reports/teardrop-review/after/
           if-no-files-found: ignore
