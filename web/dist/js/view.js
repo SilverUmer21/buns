@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
-import {CAMERA_DEFAULT, clampCameraAngle, fitBoardCamera} from './camera.js';
+import {CAMERA_DEFAULT, clampCameraAngle, fitBoardCamera} from './camera.js?v=motion3';
 import {makeDoughRelief, applyFruitDoughRelief} from './dough_surface.js';
+import {mergeArrival, mergeDeparture, escapePose, createEventEffects} from './event_animation.js';
 
 // The solver owns positions. This file owns only the camera, art and soft motion.
 const FLOOR = 0.215;
@@ -35,6 +36,10 @@ class DoughMotion {
     this.limb = [0, 0]; this.limbv = [0, 0];
     this.offset = [0, 0]; this.ov = [0, 0];
     this.direction = [0, 0]; this.strength = 0;
+    // Pointer samples can arrive unevenly on touchscreens. Filter the whole
+    // pull vector, rather than its angle, so reversing direction passes smoothly
+    // through the neutral pose instead of snapping the bun around.
+    this.pull = [0, 0]; this.pullVelocity = [0, 0];
     this.squashDirection = [0, 1];
     this.directional = 0; this.directionalVelocity = 0;
     this.expression = 0; this.expressionVelocity = 0;
@@ -43,9 +48,8 @@ class DoughMotion {
     this.phase = id * 1.173; this.clock = 0; this.accumulator = 0;
   }
   aim(dir, strength) {
-    const length = Math.hypot(dir.x, dir.y) || 1;
-    this.direction = [dir.x / length, dir.y / length];
-    if (Math.hypot(dir.x, dir.y) > 0.001) this.squashDirection = [...this.direction];
+    const length = Math.hypot(dir.x, dir.y);
+    if (length > 0.001) this.direction = [dir.x / length, dir.y / length];
     this.strength = THREE.MathUtils.clamp(strength, 0, 1);
     this.held = true; this.returning = false;
   }
@@ -88,8 +92,16 @@ class DoughMotion {
   step(dt) {
     this.clock += dt;
     this.reactionAge += dt;
+    for (let axis = 0; axis < 2; axis++) {
+      const pullTarget = this.held ? this.direction[axis] * this.strength : 0;
+      [this.pull[axis], this.pullVelocity[axis]] = spring(this.pull[axis], this.pullVelocity[axis], pullTarget, 11, 1, dt);
+    }
+    const pullAmount = Math.min(1, Math.hypot(...this.pull));
+    if (this.held && pullAmount > 0.005) this.squashDirection = this.pull.map(value => value / pullAmount);
     const tracking = this.held || this.returning || this.reduced;
-    let target = this.held ? 1 - (this.reduced ? 0.10 : 0.23) * this.strength : 1 + (this.reduced ? 0 : 0.012) * Math.sin(this.clock * 2.4 + this.phase);
+    // Selection gives a small anticipatory crouch, then the bun stretches
+    // along the drag as the player loads the shot. The physics stays still.
+    let target = this.held ? 1 - (this.reduced ? 0.08 * pullAmount : 0.025 + 0.15 * pullAmount) : 1 + (this.reduced ? 0 : 0.012) * Math.sin(this.clock * 2.4 + this.phase);
     if (this.returning) target = 1;
     [this.height, this.hv] = spring(this.height, this.hv, target, tracking ? 8 : 4.4, tracking ? 1 : 0.34, dt);
     if (this.height < 0.72 || this.height > 1.16) {
@@ -98,7 +110,7 @@ class DoughMotion {
     }
     for (let axis = 0; axis < 2; axis++) {
       const idleLean = this.reduced ? 0 : 0.010 * Math.sin(this.clock * 1.45 + this.phase + axis * 1.3);
-      const leanTarget = this.held ? -this.direction[axis] * this.strength * (this.reduced ? 0.025 : 0.17) : idleLean;
+      const leanTarget = this.held ? -this.pull[axis] * (this.reduced ? 0.025 : 0.17) : idleLean;
       [this.lean[axis], this.lv[axis]] = spring(this.lean[axis], this.lv[axis], leanTarget, tracking ? 8 : 4.4, tracking ? 1 : 0.4, dt);
       this.lean[axis] = THREE.MathUtils.clamp(this.lean[axis], -0.18, 0.18);
       const crestTarget = this.reduced ? 0 : -this.lean[axis] * 1.25 + (axis ? (1 - this.height) * 0.28 : 0);
@@ -107,16 +119,16 @@ class DoughMotion {
       const limbTarget = this.reduced ? 0 : (axis ? this.lean[1] * 0.7 : (this.height - 1) * 0.75 + this.hv * 0.022);
       [this.limb[axis], this.limbv[axis]] = spring(this.limb[axis], this.limbv[axis], limbTarget, 3.7, this.returning ? 0.7 : 0.34, dt);
       this.limb[axis] = THREE.MathUtils.clamp(this.limb[axis], -0.22, 0.22);
-      const offsetTarget = this.held ? -this.direction[axis] * this.strength * (this.reduced ? 0.06 : 0.17) : 0;
+      const offsetTarget = this.held ? -this.pull[axis] * (this.reduced ? 0.06 : 0.20) : 0;
       [this.offset[axis], this.ov[axis]] = spring(this.offset[axis], this.ov[axis], offsetTarget, tracking ? 8 : 6.5, tracking ? 1 : 0.5, dt);
     }
-    const squeezeTarget = this.held && !this.reduced ? -this.direction[0] * this.strength * 0.03 : 0;
+    const squeezeTarget = this.held && !this.reduced ? -this.pull[0] * 0.025 : 0;
     [this.squeeze, this.sv] = spring(this.squeeze, this.sv, squeezeTarget, 5, tracking ? 0.8 : 0.35, dt);
     this.squeeze = THREE.MathUtils.clamp(this.squeeze, -0.065, 0.065);
-    const directionalTarget = this.held && !this.reduced ? 0.13 * this.strength : 0;
+    const directionalTarget = this.held && !this.reduced ? -0.14 * pullAmount : 0;
     [this.directional, this.directionalVelocity] = spring(this.directional, this.directionalVelocity, directionalTarget, tracking ? 8 : 4.7, tracking ? 1 : 0.40, dt);
     this.directional = THREE.MathUtils.clamp(this.directional, -0.13, 0.16);
-    const expressionTarget = this.held && !this.reduced ? 0.36 * this.strength : 0;
+    const expressionTarget = this.held && !this.reduced ? 0.08 + 0.30 * pullAmount : 0;
     [this.expression, this.expressionVelocity] = spring(this.expression, this.expressionVelocity, expressionTarget, tracking ? 7 : 4.8, tracking ? 1 : 0.45, dt);
     this.expression = THREE.MathUtils.clamp(this.expression, -0.65, 0.55);
     if (this.returning && Math.abs(this.height - 1) < 0.001 && Math.hypot(...this.offset) < 0.001) this.returning = false;
@@ -238,6 +250,7 @@ export async function createView(canvas) {
   let gateOpen = false, gateAge = 0, jellyAge = 10, jellyStrength = 0;
   let reduced = false;
   const entries = new Map(), departing = [], crumbs = [], mergeRings = [];
+  const eventEffects = createEventEffects(THREE, scene, FLOOR);
   const shadowMap = shadowTexture();
   const shadowGeometry = new THREE.PlaneGeometry(1, 1);
   const crumbGeometry = new THREE.SphereGeometry(0.045, 7, 5);
@@ -292,7 +305,7 @@ export async function createView(canvas) {
     const motion = new DoughMotion(bun.id); motion.reduced = reduced;
     const entry = {id: bun.id, tier: bun.tier, group, visual, model, bones, authored, shadow, mouthShapes,
       motion, clips: templates[key].animations, mixer: new THREE.AnimationMixer(model), action: null,
-      pendingIdle: false, nextBlink: 2.8 + (bun.id * 1.17) % 2.5, age: 0, arrival: null, position: {x: bun.position.x, y: bun.position.y}};
+      pendingIdle: false, nextBlink: 2.8 + (bun.id * 1.17) % 2.5, age: 0, arrival: null, escapeAge: null, position: {x: bun.position.x, y: bun.position.y}};
     entry.mixer.addEventListener('finished', () => { entry.pendingIdle = true; });
     play(entry, 'idle', 0);
     entry.action.time = (bun.id * 0.317) % Math.max(0.01, entry.action.getClip().duration);
@@ -303,7 +316,6 @@ export async function createView(canvas) {
     entries.delete(entry.id);
     if (instant || reduced) {
       scene.remove(entry.group, entry.shadow); entry.mixer.stopAllAction(); entry.shadow.material.dispose();
-      for (const shape of entry.mouthShapes) shape.geometry.dispose();
       for (const shape of entry.mouthShapes) shape.geometry.dispose();
     } else { departing.push({entry, age: 0}); }
   }
@@ -359,12 +371,18 @@ export async function createView(canvas) {
             entry.arrival = reduced ? null : 0;
             play(entry, reduced ? 'idle' : 'merge');
             popMerge(entry.position, entry.tier);
+            if (!reduced) eventEffects.emit(entry.position, 'merge', entry.tier);
             for (const item of departing) if (event.from?.includes(item.entry.id)) item.target = {...entry.position};
           }
           break;
         case 'jelly': jellyAge = 0; jellyStrength = event.strength ?? 0.7; break;
         case 'gate': gateOpen = true; gateAge = 0; if (entry) popCrumbs({x: 0, y: 3.45}); break;
-        case 'escape': if (entry) { play(entry, reduced ? 'idle' : 'escape'); popCrumbs(entry.position); } break;
+        case 'escape': if (entry) {
+          play(entry, reduced ? 'idle' : 'escape');
+          entry.escapeAge = reduced ? null : 0;
+          popCrumbs(entry.position);
+          if (!reduced) eventEffects.emit(entry.position, 'escape', entry.tier);
+        } break;
       }
     }
   }
@@ -416,14 +434,27 @@ export async function createView(canvas) {
       if (b['Foot.' + side]) b['Foot.' + side].quaternion.multiply(ROTATION.setFromEuler(EULER.set(-m.limb[0] * 0.5, 0, 0)));
     }
     entry.visual.position.set(m.offset[0], 0, -m.offset[1]);
+    entry.visual.rotation.z = 0;
+    // Start from a clean presentation scale every frame; celebration poses
+    // are samples, not cumulative transforms.
+    entry.visual.scale.setScalar(1);
     if (entry.arrival !== null) {
       entry.arrival += dt;
-      const t = Math.min(1, entry.arrival / 0.26);
-      const scale = 0.72 + 0.28 * (1 - Math.pow(1 - t, 3)) + 0.055 * Math.sin(Math.PI * t);
-      entry.visual.scale.setScalar(scale);
-      if (t >= 1) { entry.arrival = null; entry.visual.scale.setScalar(1); }
+      entry.visual.scale.setScalar(mergeArrival(entry.arrival));
+      if (entry.arrival >= 0.55) { entry.arrival = null; entry.visual.scale.setScalar(1); }
     }
-    const hop = Math.max(0, b.Root?.position.y || 0);
+    let celebrationHop = 0;
+    if (entry.escapeAge !== null) {
+      entry.escapeAge += dt;
+      const pose = escapePose(entry.escapeAge);
+      celebrationHop = pose.y;
+      entry.visual.position.y += pose.y;
+      entry.visual.rotation.z = pose.tilt;
+      const baseScale = entry.visual.scale.x;
+      entry.visual.scale.set(baseScale * pose.scaleXZ, baseScale * pose.scaleY, baseScale * pose.scaleXZ);
+      if (pose.done) entry.escapeAge = null;
+    }
+    const hop = Math.max(0, (b.Root?.position.y || 0) + celebrationHop);
     entry.shadow.material.opacity = 0.65 / (1 + hop * 3);
     entry.shadow.scale.setScalar(RADII[entry.tier] * 2.8 * (1 + hop * 0.2));
     entry.age += dt;
@@ -437,14 +468,14 @@ export async function createView(canvas) {
     for (const entry of entries.values()) deform(entry, dt);
     for (let i = departing.length - 1; i >= 0; i--) {
       const departingEntry = departing[i]; departingEntry.age += dt;
-      const progress = Math.min(1, departingEntry.age / 0.16);
-      departingEntry.entry.group.scale.setScalar(Math.max(0.001, 1 - progress * progress));
+      const {progress, scale, opacity} = mergeDeparture(departingEntry.age);
+      departingEntry.entry.group.scale.setScalar(scale);
       if (departingEntry.target) {
         const p = departingEntry.entry.position;
         departingEntry.entry.group.position.x = THREE.MathUtils.lerp(p.x, departingEntry.target.x, progress);
         departingEntry.entry.group.position.z = -THREE.MathUtils.lerp(p.y, departingEntry.target.y, progress);
       }
-      departingEntry.entry.shadow.material.opacity = (1 - progress) * 0.4;
+      departingEntry.entry.shadow.material.opacity = opacity * 0.4;
       if (progress >= 1) { removeEntry(departingEntry.entry, true); departing.splice(i, 1); }
     }
     for (let i = mergeRings.length - 1; i >= 0; i--) {
@@ -467,6 +498,7 @@ export async function createView(canvas) {
       crumb.mesh.scale.setScalar(Math.max(0.01, 1 - crumb.age / 0.5));
       if (crumb.age >= 0.5) { scene.remove(crumb.mesh); crumbs.splice(i, 1); }
     }
+    eventEffects.update(dt);
     renderer.render(scene, camera);
   }
   function resize() {
@@ -504,6 +536,7 @@ export async function createView(canvas) {
     crumbs.length = 0;
     for (const {mesh} of mergeRings) { scene.remove(mesh); mesh.geometry.dispose(); mesh.material.dispose(); }
     mergeRings.length = 0;
+    eventEffects.reset();
     gateOpen = false; gateAge = 0; jellyAge = 10; jellyStrength = 0;
     jelly.scale.setScalar(1);
     if (wafer) { wafer.visible = true; wafer.position.y = 0; wafer.rotation.z = 0; }
@@ -511,8 +544,8 @@ export async function createView(canvas) {
   }
   function setReducedMotion(value) {
     reduced = !!value;
-    for (const entry of entries.values()) { entry.motion.reduced = reduced; if (reduced) { entry.motion.hv = entry.motion.sv = entry.motion.directionalVelocity = entry.motion.expressionVelocity = 0; entry.motion.lv.fill(0); entry.arrival = null; entry.visual.scale.setScalar(1); } }
-    if (reduced) { for (const {mesh} of crumbs) scene.remove(mesh); crumbs.length = 0; for (const {mesh} of mergeRings) { scene.remove(mesh); mesh.geometry.dispose(); mesh.material.dispose(); } mergeRings.length = 0; jelly.scale.setScalar(1); }
+    for (const entry of entries.values()) { entry.motion.reduced = reduced; if (reduced) { entry.motion.hv = entry.motion.sv = entry.motion.directionalVelocity = entry.motion.expressionVelocity = 0; entry.motion.lv.fill(0); entry.arrival = null; entry.escapeAge = null; entry.visual.rotation.z = 0; entry.visual.scale.setScalar(1); } }
+    if (reduced) { for (const {mesh} of crumbs) scene.remove(mesh); crumbs.length = 0; for (const {mesh} of mergeRings) { scene.remove(mesh); mesh.geometry.dispose(); mesh.material.dispose(); } mergeRings.length = 0; eventEffects.reset(); jelly.scale.setScalar(1); }
   }
   function configureLevel(level) {
     const bumper = level.bumpers[0];
@@ -540,5 +573,5 @@ export async function createView(canvas) {
   return {setBuns, syncEvents, aim, cancelAim, resize, render, worldFromScreen, screenFromWorld,
     pickBun, reset, configureLevel, setGateOpen, setReducedMotion, setCameraAngle, inspect, debug: inspect,
     capture: () => { renderer.render(scene, camera); return canvas.toDataURL('image/png'); },
-    dispose: () => { observer.disconnect(); window.removeEventListener('resize', resize); reset(); doughRelief.dispose(); renderer.dispose(); }};
+    dispose: () => { observer.disconnect(); window.removeEventListener('resize', resize); reset(); eventEffects.dispose(); doughRelief.dispose(); renderer.dispose(); }};
 }

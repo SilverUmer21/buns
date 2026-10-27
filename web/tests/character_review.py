@@ -22,8 +22,20 @@ async def main():
         for i in range(4): await page.evaluate('window.__bunbreak.advance(.08)')
         held=await page.evaluate('window.__bunbreak.inspect()')
         bun=next(b for b in held['motion']['buns'] if b['id']==1)
-        assert bun['held'] and bun['height'] < .85 and bun['directional'] > .08 and abs(bun['expression'])>.15 and abs(bun['volume']-1)<.001, bun
+        assert bun['held'] and bun['height'] < .9 and bun['directional'] < -.08 and abs(bun['expression'])>.15 and abs(bun['volume']-1)<.001, bun
         await page.screenshot(path=str(OUT/'held-right.png'))
+        # Reversing the finger should pass through neutral, not teleport the
+        # visual in the opposite direction; cancelling should return it home.
+        await page.evaluate('window.__bunbreak.aim(1,{x:-1,y:0},1);window.__bunbreak.advance(1/60)')
+        reversing=await page.evaluate('window.__bunbreak.inspect().motion.buns.find(b=>b.id===1)')
+        assert reversing['offset']['x'] < 0, reversing
+        for i in range(6): await page.evaluate('window.__bunbreak.advance(.08)')
+        reversed_bun=await page.evaluate('window.__bunbreak.inspect().motion.buns.find(b=>b.id===1)')
+        assert reversed_bun['offset']['x'] > .1, reversed_bun
+        await page.evaluate('window.__bunbreak.cancelAim(1)')
+        for i in range(9): await page.evaluate('window.__bunbreak.advance(.08)')
+        cancelled=await page.evaluate('window.__bunbreak.inspect().motion.buns.find(b=>b.id===1)')
+        assert not cancelled['held'] and abs(cancelled['offset']['x']) < .01, cancelled
         for stage,tier,vy in [(1,2,7),(3,3,7)]:
             await page.evaluate('''([stage,vy])=>{
                 const g=window.__bunbreak;g.chooseLevel(stage);g.release(1,{x:0,y:vy});

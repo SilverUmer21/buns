@@ -1,7 +1,7 @@
 import {Solver, STEP, RADII, MAX_SPEED, SOLUTION} from './physics.js';
-import {createView} from './view.js?v=feel2';
+import {createView} from './view.js?v=motion3';
 import {LEVELS, applyLevel} from './levels.js';
-import {CAMERA_DEFAULT, CAMERA_MIN, CAMERA_MAX, clampCameraAngle} from './camera.js';
+import {CAMERA_DEFAULT, CAMERA_MIN, CAMERA_MAX, clampCameraAngle} from './camera.js?v=motion3';
 const $=s=>document.querySelector(s), canvas=$('#world'), layer=$('#aim'), ctx=layer.getContext('2d');
 const solver=new Solver(), history=[];let view, flow='title', selected=null, pointer=null, origin=null, velocity={x:0,y:0},strength=0,acc=0,last=0,winAge=0,demo=false,demoIndex=0,demoWait=0,muted=false,reduced=matchMedia('(prefers-reduced-motion: reduce)').matches,best={},completed={},levelIndex=0,cameraAngle=CAMERA_DEFAULT,taught=false,frozen=false,prediction=[];
 try{const p=JSON.parse(localStorage.getItem('bunbreak-web')||'{}');best=typeof p.best==='object'&&p.best?p.best:{};completed=p.completed||{};levelIndex=Number.isInteger(p.levelIndex)?Math.max(0,Math.min(5,p.levelIndex)):0;cameraAngle=clampCameraAngle(p.cameraAngle??CAMERA_DEFAULT);muted=!!p.muted;reduced=p.reduced??reduced;taught=!!p.taught;}catch{}
