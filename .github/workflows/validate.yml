@@ -66,11 +66,16 @@ jobs:
           python3 -m http.server 4173 --directory web/dist >/tmp/bunbreak-server.log 2>&1 &
           trap 'kill $! 2>/dev/null || true' EXIT
           timeout 120 python3 web/tests/mobile_layout.py
+          timeout 120 python3 web/tests/pointer_feedback.py
+          timeout 180 python3 web/tests/recovery_browser.py
           timeout 600 python3 web/tests/animation_sequence.py
+          timeout 300 python3 web/tests/tactile_review.py after
       - name: Retain actual rendered animation frames
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: bunbreak-browser-frames
-          path: reports/animation-sequence/
+          path: |
+            reports/animation-sequence/
+            reports/tactile-review/after/
           if-no-files-found: ignore
