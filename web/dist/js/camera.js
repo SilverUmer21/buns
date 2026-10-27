@@ -1,7 +1,7 @@
 /** Stable board camera: angle and framing affect presentation, never physics. */
 export const CAMERA_MIN = 35;
 export const CAMERA_MAX = 75;
-export const CAMERA_DEFAULT = 52;
+export const CAMERA_DEFAULT = 45;
 export function clampCameraAngle(value) {
   const n = Number(value);
   return Number.isFinite(n) ? Math.max(CAMERA_MIN, Math.min(CAMERA_MAX, n)) : CAMERA_DEFAULT;

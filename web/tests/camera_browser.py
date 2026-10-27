@@ -20,8 +20,8 @@ async def main():
         await page.get_by_role('button',name='Adjust board angle').click()
         slider=page.get_by_role('slider',name='Board camera angle')
         before=await page.evaluate('window.__bunbreak.inspect()')
-        assert before['cameraAngle']==52
-        for angle in [35,55,75]:
+        assert before['cameraAngle']==45
+        for angle in [35,45,55,75]:
             await slider.evaluate('(el,value)=>{el.value=value;el.dispatchEvent(new Event("input",{bubbles:true}))}',str(angle))
             info=await page.evaluate('''() => {const g=window.__bunbreak;const s=g.inspect();const p=g.screenFor(1);return {state:s,point:p,world:g.worldFor(p.x,p.y),corners:[[-3.83,-5.63],[-3.83,5.63],[3.83,-5.63],[3.83,5.63]].map(([x,y])=>g.screenForWorld({x,y})),rect:document.querySelector('#world').getBoundingClientRect().toJSON()};}''')
             assert info['state']['cameraAngle']==angle and info['state']['motion']['cameraAngle']==angle
@@ -38,8 +38,19 @@ async def main():
         await page.reload(wait_until='networkidle')
         await page.wait_for_function('!!window.__bunbreak')
         assert (await page.evaluate('window.__bunbreak.inspect()'))['cameraAngle']==75
+        # A previously saved choice must survive a reload, while Reset returns
+        # to the owner-selected default and persists that new choice.
+        await page.get_by_role('button',name='Play',exact=True).click()
+        await page.evaluate('window.__bunbreak.freeze();window.__bunbreak.pause()')
+        await page.get_by_role('button',name='Adjust board angle').click()
+        await page.get_by_role('button',name='Reset angle').click()
+        assert (await page.evaluate('window.__bunbreak.inspect()'))['cameraAngle']==45
+        assert await page.evaluate("JSON.parse(localStorage.getItem('bunbreak-web')).cameraAngle") == 45
+        await page.reload(wait_until='networkidle')
+        await page.wait_for_function('!!window.__bunbreak')
+        assert (await page.evaluate('window.__bunbreak.inspect()'))['cameraAngle']==45
         assert not errors,errors
-        print('Camera browser checks passed: live 35–75°, no physics changes, board fit, input projection and persistence.')
+        print('Camera browser checks passed: live 35–75°, no physics changes, board fit, input projection, saved preference and 45° reset.')
         await browser.close()
 
 asyncio.run(main())
