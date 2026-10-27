@@ -50,3 +50,27 @@ jobs:
         with:
           name: bunbreak-validation
           path: reports/*.json
+
+  browser-motion-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install browser review dependencies
+        run: python3 -m pip install --user playwright pillow
+      - name: Render mobile controls and animation sequences
+        shell: bash
+        env:
+          CHROMIUM_PATH: /usr/bin/google-chrome
+        run: |
+          python3 -m http.server 4173 --directory web/dist >/tmp/bunbreak-server.log 2>&1 &
+          trap 'kill $! 2>/dev/null || true' EXIT
+          timeout 120 python3 web/tests/mobile_layout.py
+          timeout 600 python3 web/tests/animation_sequence.py
+      - name: Retain actual rendered animation frames
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bunbreak-browser-frames
+          path: reports/animation-sequence/
+          if-no-files-found: ignore

@@ -5,6 +5,7 @@ this script. Images are real Chromium/Three.js frames, not Blender renders.
 """
 import asyncio
 import json
+import os
 from pathlib import Path
 
 from PIL import Image, ImageDraw
@@ -17,7 +18,7 @@ OUT.mkdir(parents=True, exist_ok=True)
 
 async def main():
     async with async_playwright() as p:
-        browser = await p.chromium.launch(executable_path='/usr/bin/chromium', headless=True,
+        browser = await p.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH', '/usr/bin/chromium'), headless=True,
             args=['--no-sandbox', '--enable-unsafe-swiftshader', '--use-angle=swiftshader', '--disable-dev-shm-usage'])
         page = await browser.new_page(viewport={'width': 390, 'height': 844})
         errors = []

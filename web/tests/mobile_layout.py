@@ -4,13 +4,14 @@ Run with the built-in server serving web/dist on 127.0.0.1:4173. These are
 emulated viewports, not device performance or notch/safe-area measurements.
 """
 import asyncio
+import os
 from playwright.async_api import async_playwright
 
 
 async def main():
     async with async_playwright() as p:
         browser = await p.chromium.launch(
-            executable_path='/usr/bin/chromium', headless=True,
+            executable_path=os.environ.get('CHROMIUM_PATH', '/usr/bin/chromium'), headless=True,
             args=['--no-sandbox', '--enable-unsafe-swiftshader', '--use-angle=swiftshader', '--disable-dev-shm-usage'])
         for width, height in [(320, 568), (390, 844), (844, 390)]:
             page = await browser.new_page(viewport={'width': width, 'height': height}, device_scale_factor=2, has_touch=True, is_mobile=True)
