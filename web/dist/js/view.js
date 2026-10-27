@@ -3,7 +3,9 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
 import {CAMERA_DEFAULT, clampCameraAngle, fitBoardCamera} from './camera.js?v=motion3';
 import {makeDoughRelief, applyFruitDoughRelief} from './dough_surface.js';
-import {mergeArrival, mergeDeparture, escapePose, createEventEffects} from './event_animation.js';
+import {prepareFaceExpression, applyFaceExpression} from './face_expression.js?v=anchored4';
+import {createLocalizedPull, samplePullDeformation} from './localized_pull.js?v=anchored4';
+import {mergePose, mergeDeparture, escapePose, createEventEffects} from './event_animation.js?v=anchored4';
 
 // The solver owns positions. This file owns only the camera, art and soft motion.
 const FLOOR = 0.215;
@@ -13,6 +15,12 @@ const SIZES = [0, 0.82, 0.94, 1.05];
 const TEMP = new THREE.Vector3();
 const EULER = new THREE.Euler();
 const ROTATION = new THREE.Quaternion();
+const PULL_AXIS = new THREE.Vector3();
+const PULL_ROTATION = new THREE.Quaternion();
+const TENSOR = new THREE.Matrix4();
+const TENSOR_ROTATION = new THREE.Matrix4();
+const TENSOR_INVERSE = new THREE.Matrix4();
+const TENSOR_SCALE = new THREE.Matrix4();
 
 function spring(value, velocity, target, hz, damping, dt) {
   const w = Math.PI * 2 * hz;
@@ -94,14 +102,14 @@ class DoughMotion {
     this.reactionAge += dt;
     for (let axis = 0; axis < 2; axis++) {
       const pullTarget = this.held ? this.direction[axis] * this.strength : 0;
-      [this.pull[axis], this.pullVelocity[axis]] = spring(this.pull[axis], this.pullVelocity[axis], pullTarget, 4.5, 1, dt);
+      [this.pull[axis], this.pullVelocity[axis]] = spring(this.pull[axis], this.pullVelocity[axis], pullTarget, 4.5, this.held || this.returning || this.reduced ? 1 : 0.38, dt);
     }
     const pullAmount = Math.min(1, Math.hypot(...this.pull));
     if (this.held && pullAmount > 0.005) this.squashDirection = this.pull.map(value => value / pullAmount);
     const tracking = this.held || this.returning || this.reduced;
     // Selection gives a small anticipatory crouch, then the bun stretches
     // along the drag as the player loads the shot. The physics stays still.
-    let target = this.held ? 1 - (this.reduced ? 0.08 * pullAmount : 0.025 + 0.15 * pullAmount) : 1 + (this.reduced ? 0 : 0.012) * Math.sin(this.clock * 2.4 + this.phase);
+    let target = this.held ? 1 - (this.reduced ? 0.03 * pullAmount : 0.02 + 0.06 * pullAmount) : 1 + (this.reduced ? 0 : 0.012) * Math.sin(this.clock * 2.4 + this.phase);
     if (this.returning) target = 1;
     [this.height, this.hv] = spring(this.height, this.hv, target, tracking ? 5.5 : 4.4, tracking ? 1 : 0.34, dt);
     if (this.height < 0.72 || this.height > 1.16) {
@@ -110,7 +118,7 @@ class DoughMotion {
     }
     for (let axis = 0; axis < 2; axis++) {
       const idleLean = this.reduced ? 0 : 0.010 * Math.sin(this.clock * 1.45 + this.phase + axis * 1.3);
-      const leanTarget = this.held ? -this.pull[axis] * (this.reduced ? 0.025 : 0.17) : idleLean;
+      const leanTarget = this.held ? -this.pull[axis] * (this.reduced ? 0.015 : 0.06) : idleLean;
       [this.lean[axis], this.lv[axis]] = spring(this.lean[axis], this.lv[axis], leanTarget, tracking ? 5.5 : 4.4, tracking ? 1 : 0.4, dt);
       this.lean[axis] = THREE.MathUtils.clamp(this.lean[axis], -0.18, 0.18);
       const crestTarget = this.reduced ? 0 : -this.lean[axis] * 1.25 + (axis ? (1 - this.height) * 0.28 : 0);
@@ -119,13 +127,13 @@ class DoughMotion {
       const limbTarget = this.reduced ? 0 : (axis ? this.lean[1] * 0.7 : (this.height - 1) * 0.75 + this.hv * 0.022);
       [this.limb[axis], this.limbv[axis]] = spring(this.limb[axis], this.limbv[axis], limbTarget, 3.7, this.returning ? 0.7 : 0.34, dt);
       this.limb[axis] = THREE.MathUtils.clamp(this.limb[axis], -0.22, 0.22);
-      const offsetTarget = this.held ? -this.pull[axis] * (this.reduced ? 0.06 : 0.20) : 0;
+      const offsetTarget = this.held ? -this.pull[axis] * (this.reduced ? 0.01 : 0.025) : 0;
       [this.offset[axis], this.ov[axis]] = spring(this.offset[axis], this.ov[axis], offsetTarget, tracking ? 5.5 : 6.5, tracking ? 1 : 0.5, dt);
     }
     const squeezeTarget = this.held && !this.reduced ? -this.pull[0] * 0.025 : 0;
     [this.squeeze, this.sv] = spring(this.squeeze, this.sv, squeezeTarget, 5, tracking ? 0.8 : 0.35, dt);
     this.squeeze = THREE.MathUtils.clamp(this.squeeze, -0.065, 0.065);
-    const directionalTarget = this.held && !this.reduced ? -0.14 * pullAmount : 0;
+    const directionalTarget = 0;
     [this.directional, this.directionalVelocity] = spring(this.directional, this.directionalVelocity, directionalTarget, tracking ? 5.5 : 4.7, tracking ? 1 : 0.40, dt);
     this.directional = THREE.MathUtils.clamp(this.directional, -0.13, 0.16);
     const expressionTarget = this.held && !this.reduced ? 0.08 + 0.30 * pullAmount : 0;
@@ -165,27 +173,7 @@ function prepareMaterials(object) {
 // small, relative mouth shape so the face can react without moving away from the
 // Body bone or changing the original authoring assets. Bounding boxes, not
 // hard-coded face coordinates, keep this compatible with revised GLB geometry.
-function makeMouthExpressions(model) {
-  const shapes = [];
-  model.traverse(node => {
-    if (!node.isSkinnedMesh || !/(?:_smile|_tongue)$/i.test(node.name)) return;
-    const geometry = node.geometry.clone();
-    geometry.computeBoundingBox();
-    const center = geometry.boundingBox.getCenter(new THREE.Vector3());
-    const position = geometry.attributes.position;
-    const offsets = new Float32Array(position.count * 3);
-    for (let i = 0; i < position.count; i++) {
-      offsets[i * 3] = (position.getX(i) - center.x) * 0.10;
-      offsets[i * 3 + 1] = (position.getY(i) - center.y) * 0.27;
-    }
-    geometry.morphAttributes.position = [new THREE.Float32BufferAttribute(offsets, 3)];
-    geometry.morphTargetsRelative = true;
-    node.geometry = geometry;
-    node.updateMorphTargets();
-    shapes.push(node);
-  });
-  return shapes;
-}
+function makeMouthExpressions(model) { return prepareFaceExpression(model, THREE); }
 
 function shadowTexture() {
   const canvas = document.createElement('canvas');
@@ -289,6 +277,7 @@ export async function createView(canvas) {
     model.scale.setScalar(SIZES[bun.tier]);
     visual.add(model); scene.add(group);
     const mouthShapes = makeMouthExpressions(model);
+    const localizedPull = createLocalizedPull(model, bun.tier === 3 ? 0.87 : 0.84);
     const bones = {}, authored = [];
     model.traverse(node => {
       node.userData.bunId = bun.id;
@@ -303,7 +292,7 @@ export async function createView(canvas) {
     shadow.rotation.x = -Math.PI / 2; shadow.position.y = FLOOR + 0.008;
     shadow.scale.setScalar(RADII[bun.tier] * 2.8); scene.add(shadow);
     const motion = new DoughMotion(bun.id); motion.reduced = reduced;
-    const entry = {id: bun.id, tier: bun.tier, group, visual, model, bones, authored, shadow, mouthShapes,
+    const entry = {id: bun.id, tier: bun.tier, group, visual, model, bones, authored, shadow, mouthShapes, localizedPull,
       motion, clips: templates[key].animations, mixer: new THREE.AnimationMixer(model), action: null,
       pendingIdle: false, nextBlink: 2.8 + (bun.id * 1.17) % 2.5, age: 0, arrival: null, escapeAge: null, position: {x: bun.position.x, y: bun.position.y}};
     entry.mixer.addEventListener('finished', () => { entry.pendingIdle = true; });
@@ -317,6 +306,7 @@ export async function createView(canvas) {
     if (instant || reduced) {
       scene.remove(entry.group, entry.shadow); entry.mixer.stopAllAction(); entry.shadow.material.dispose();
       for (const shape of entry.mouthShapes) shape.geometry.dispose();
+      entry.localizedPull.dispose();
     } else { departing.push({entry, age: 0}); }
   }
   function setBuns(buns, alpha = 1) {
@@ -372,7 +362,7 @@ export async function createView(canvas) {
             play(entry, reduced ? 'idle' : 'merge');
             popMerge(entry.position, entry.tier);
             if (!reduced) eventEffects.emit(entry.position, 'merge', entry.tier);
-            for (const item of departing) if (event.from?.includes(item.entry.id)) item.target = {...entry.position};
+            for (const item of departing) if (event.from?.includes(item.entry.id)) { item.target = {...entry.position}; item.targetId = entry.id; }
           }
           break;
         case 'jelly': jellyAge = 0; jellyStrength = event.strength ?? 0.7; break;
@@ -414,21 +404,35 @@ export async function createView(canvas) {
     for (const pose of entry.authored) { pose.position.copy(pose.bone.position); pose.rotation.copy(pose.bone.quaternion); pose.scale.copy(pose.bone.scale); }
     entry.motion.update(dt);
     const m = entry.motion, b = entry.bones;
+    // Convert the finger direction from board coordinates into model-local
+    // coordinates; the animated mesh bends, but the physics collider stays put.
+    const pullMagnitude = Math.min(1, Math.hypot(...m.pull));
+    const pullAxis = PULL_AXIS.set(-m.pull[0], 0, m.pull[1]);
+    if (pullMagnitude > 0.00001) pullAxis.normalize().applyQuaternion(PULL_ROTATION.copy(entry.model.quaternion).invert());
+    else pullAxis.set(1, 0, 0);
+    const pullDeformation = pullMagnitude * (m.reduced ? 0.10 : 0.58);
+    entry.localizedPull.update(pullAxis, pullDeformation);
     const lateral = 1 / Math.sqrt(m.height);
     const [dx, dy] = m.squashDirection;
-    // Axial compression responds to the impact direction, not merely X-width.
-    // Reciprocal plane scales preserve volume while direction/lean and delayed
-    // crest/limb motion produce the asymmetry of soft dough.
-    const directional = m.directional * (dx * dx - dy * dy);
-    const sideways = Math.exp(m.squeeze - directional);
+    // The impact/release stretch is an oriented tensor in the board plane.
+    // A single X/Z scale loses all directional effect on a 45-degree shot;
+    // composing R * S * R^-1 keeps the correct diagonal and determinant 1.
+    const sideways = Math.exp(m.squeeze);
     if (b.Body) {
       b.Body.scale.set(lateral * sideways, m.height, lateral / sideways);
       b.Body.quaternion.multiply(ROTATION.setFromEuler(EULER.set(m.lean[1], 0, -m.lean[0])));
+      const localAxis = PULL_AXIS.set(dx, 0, -dy).applyQuaternion(PULL_ROTATION.copy(entry.model.quaternion).invert());
+      const angle = Math.atan2(-localAxis.z, localAxis.x);
+      TENSOR_ROTATION.makeRotationY(angle);
+      TENSOR_INVERSE.makeRotationY(-angle);
+      TENSOR_SCALE.makeScale(Math.exp(-m.directional), 1, Math.exp(m.directional));
+      TENSOR.multiplyMatrices(TENSOR_ROTATION, TENSOR_SCALE).multiply(TENSOR_INVERSE);
+      b.Body.matrixAutoUpdate = false;
+      b.Body.matrix.compose(b.Body.position, b.Body.quaternion, b.Body.scale).multiply(TENSOR);
+      b.Body.matrixWorldNeedsUpdate = true;
     }
     if (b.Crest) b.Crest.quaternion.multiply(ROTATION.setFromEuler(EULER.set(m.crest[1], 0, -m.crest[0])));
-    const eyeScale = THREE.MathUtils.clamp(1 - m.expression * 0.38, 0.78, 1.24);
-    for (const side of ['L', 'R']) if (b['Eye.' + side]) b['Eye.' + side].scale.y *= eyeScale;
-    for (const shape of entry.mouthShapes) if (shape.morphTargetInfluences) shape.morphTargetInfluences[0] = -m.expression;
+    applyFaceExpression(entry);
     for (const [side, sign] of [['L', -1], ['R', 1]]) {
       if (b['Arm.' + side]) b['Arm.' + side].quaternion.multiply(ROTATION.setFromEuler(EULER.set(m.limb[1], 0, sign * m.limb[0])));
       if (b['Foot.' + side]) b['Foot.' + side].quaternion.multiply(ROTATION.setFromEuler(EULER.set(-m.limb[0] * 0.5, 0, 0)));
@@ -440,8 +444,11 @@ export async function createView(canvas) {
     entry.visual.scale.setScalar(1);
     if (entry.arrival !== null) {
       entry.arrival += dt;
-      entry.visual.scale.setScalar(mergeArrival(entry.arrival));
-      if (entry.arrival >= 0.55) { entry.arrival = null; entry.visual.scale.setScalar(1); }
+      const pose = mergePose(entry.arrival);
+      entry.visual.scale.set(pose.scale * pose.scaleXZ, pose.scale * pose.scaleY, pose.scale * pose.scaleXZ);
+      entry.visual.position.y += pose.y;
+      entry.visual.rotation.z = pose.tilt;
+      if (pose.done) { entry.arrival = null; entry.visual.scale.setScalar(1); entry.visual.rotation.z = 0; }
     }
     let celebrationHop = 0;
     if (entry.escapeAge !== null) {
@@ -468,15 +475,26 @@ export async function createView(canvas) {
     for (const entry of entries.values()) deform(entry, dt);
     for (let i = departing.length - 1; i >= 0; i--) {
       const departingEntry = departing[i]; departingEntry.age += dt;
-      const {progress, scale, opacity} = mergeDeparture(departingEntry.age);
+      const {progress, done, scale, opacity, scaleY, scaleXZ, y, tilt} = mergeDeparture(departingEntry.age);
+      deform(departingEntry.entry, dt);
       departingEntry.entry.group.scale.setScalar(scale);
+      // The new friend already covers the contact; avoid a distracting tiny
+      // leftover face appearing underneath it during the final dissolve.
+      departingEntry.entry.group.visible = scale >= 0.45;
+      departingEntry.entry.visual.scale.set(scaleXZ, scaleY, scaleXZ);
+      departingEntry.entry.visual.position.y = y;
       if (departingEntry.target) {
         const p = departingEntry.entry.position;
-        departingEntry.entry.group.position.x = THREE.MathUtils.lerp(p.x, departingEntry.target.x, progress);
-        departingEntry.entry.group.position.z = -THREE.MathUtils.lerp(p.y, departingEntry.target.y, progress);
+        const target = entries.get(departingEntry.targetId)?.position || departingEntry.target;
+        departingEntry.entry.group.position.x = THREE.MathUtils.lerp(p.x, target.x, progress);
+        departingEntry.entry.group.position.z = -THREE.MathUtils.lerp(p.y, target.y, progress);
+        departingEntry.entry.shadow.position.x = departingEntry.entry.group.position.x;
+        departingEntry.entry.shadow.position.z = departingEntry.entry.group.position.z;
+        const sign = Math.sign(target.x - p.x) || Math.sign(target.y - p.y) || 1;
+        departingEntry.entry.visual.rotation.z = -sign * tilt;
       }
       departingEntry.entry.shadow.material.opacity = opacity * 0.4;
-      if (progress >= 1) { removeEntry(departingEntry.entry, true); departing.splice(i, 1); }
+      if (done) { removeEntry(departingEntry.entry, true); departing.splice(i, 1); }
     }
     for (let i = mergeRings.length - 1; i >= 0; i--) {
       const effect = mergeRings[i]; effect.age += dt;
@@ -545,7 +563,7 @@ export async function createView(canvas) {
   function setReducedMotion(value) {
     reduced = !!value;
     for (const entry of entries.values()) { entry.motion.reduced = reduced; if (reduced) { entry.motion.hv = entry.motion.sv = entry.motion.directionalVelocity = entry.motion.expressionVelocity = 0; entry.motion.lv.fill(0); entry.arrival = null; entry.escapeAge = null; entry.visual.rotation.z = 0; entry.visual.scale.setScalar(1); } }
-    if (reduced) { for (const {mesh} of crumbs) scene.remove(mesh); crumbs.length = 0; for (const {mesh} of mergeRings) { scene.remove(mesh); mesh.geometry.dispose(); mesh.material.dispose(); } mergeRings.length = 0; eventEffects.reset(); jelly.scale.setScalar(1); }
+    if (reduced) { for (const {entry} of departing) removeEntry(entry, true); departing.length = 0; for (const {mesh} of crumbs) scene.remove(mesh); crumbs.length = 0; for (const {mesh} of mergeRings) { scene.remove(mesh); mesh.geometry.dispose(); mesh.material.dispose(); } mergeRings.length = 0; eventEffects.reset(); jelly.scale.setScalar(1); }
   }
   function configureLevel(level) {
     const bumper = level.bumpers[0];
@@ -558,14 +576,24 @@ export async function createView(canvas) {
     if (wafer) wafer.visible = !gateOpen;
   }
   function inspect() {
+    const pullReport = entry => {
+      const uniforms = entry.localizedPull.uniforms;
+      const axis = uniforms.bunPullAxis.value.toArray(), amount = uniforms.bunPullAmount.value;
+      const center = [0, uniforms.bunPullCenterY.value, 0];
+      const edge = sign => center.map((v, i) => v + sign * 0.76 * axis[i]);
+      return {axis, amount, anchor: samplePullDeformation(edge(-1), axis, amount, center),
+        fingerSide: samplePullDeformation(edge(1), axis, amount, center)};
+    };
     return {renderer: 'Three.js WebGL / real GLB meshes', exposure: renderer.toneMappingExposure, cameraAngle,
       gateOpen, aimed, reducedMotion: reduced, count: entries.size,
       buns: [...entries.values()].map(entry => ({id: entry.id, tier: entry.tier, height: entry.motion.height,
         held: entry.motion.held, offset: {x: entry.motion.offset[0], y: entry.motion.offset[1]},
         crest: [...entry.motion.crest], limbs: [...entry.motion.limb],
         directional: entry.motion.directional, squashDirection: [...entry.motion.squashDirection], expression: entry.motion.expression,
+        pullDeformation: pullReport(entry),
         mouthShapes: entry.mouthShapes.length,
-        volume: entry.bones.Body ? entry.bones.Body.scale.x * entry.bones.Body.scale.y * entry.bones.Body.scale.z : 1}))};
+        bodyMatrix: entry.bones.Body ? entry.bones.Body.matrix.elements.slice() : null,
+        volume: entry.bones.Body ? entry.bones.Body.matrix.determinant() : 1}))};
   }
   resize();
   const observer = new ResizeObserver(resize); observer.observe(canvas);

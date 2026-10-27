@@ -24,12 +24,14 @@ async def main():
             for key in ['held','release']:
                 b=state[key]['motion']['buns'][0]
                 out.extend([b['height'],b['volume'],b['directional'],b['expression'],*b['crest'],*b['limbs'],b['offset']['x'],b['offset']['y']])
+                field=b['pullDeformation']
+                out.extend([field['amount'],*field['axis'],*field['anchor'],*field['fingerSide']])
             return out
         baseline=flatten(states[0])
         for fps,state in zip([30,60,120],states):
             assert max(abs(a-b) for a,b in zip(baseline,flatten(state)))<.0001,(fps,state)
             assert abs(state['held']['motion']['buns'][0]['volume']-1)<.001
-        print('Rendered rig motion passed at 30, 60 and 120 FPS; volume remains stable.')
+        print('Rendered rig and localized pull match at 30/60/120 schedules; Body matrix determinant stays stable (not a whole-mesh volume measurement).')
         await browser.close()
 
 asyncio.run(main())
