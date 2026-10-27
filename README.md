@@ -2,14 +2,20 @@
 
 A bright 3D flick-and-merge puzzle. Pick a round little bun, pull backwards, hold and release. Merge friends, crack the matching wafer and escape onto the plate.
 
-## Download and play
+## Play in your browser
+
+[Open the Bunbreak browser preview](https://bunbreak-wobble-kitchen.sunlitbun1.chatgpt.site). The preview is private to the project owner. Select a bun, pull backwards, and release. Pause gives access to Undo, Retry, Show me, sound and reduced motion. The kitchen trail contains six puzzles and saves progress locally.
+
+To run the web game locally, use `cd web && npm run serve`, then open `http://localhost:4173` in a WebGL-capable browser. `node --test web/tests/*.test.mjs` runs its physics and level tests. All six stages have actual physics solution fixtures; star thresholds remain provisional pending human playtesting.
+
+## Earlier Godot downloads
 
 - [Updated v0.3 Godot project](https://raw.githubusercontent.com/SilverUmer21/buns/downloads/Bunbreak-v0.3-godot.zip) — Godot 4.6.3 Standard; unzip, import `project.godot`, press F5.
 - [All current source](https://github.com/SilverUmer21/buns/archive/refs/heads/main.zip) — editable Blender files, authoring and tests; import `godot/project.godot`.
 - [Previous visual review PDF](https://raw.githubusercontent.com/SilverUmer21/buns/downloads/Bunbreak-v2-review.pdf) — actual Blender models and evaluated poses, predating the v0.3 HUD; not a Godot screenshot.
 - [Baseline downloads and verification](docs/DOWNLOADS.md).
 
-The playable slice is **The big escape**. The other five trail stops are clearly marked Coming soon. This is an evolving prototype, not a finished six-level release.
+The Godot downloads are earlier single-level snapshots. Active web development, including the six-level trail, lives under `web/`.
 
 ## What changed
 
@@ -31,7 +37,7 @@ godot --headless --path godot --script tests/validate_flow.gd
 python3 authoring/validate_glb.py
 ```
 
-Passing headless checks does not establish visual polish, measured phone frame rate or tactile input quality. Actual Godot capture and Android build/device evidence are tracked separately in delivery notes. An intermittent baseline Godot ObjectDB-at-exit warning remains under review; it is not hidden by the behavioral test count.
+Passing headless checks does not establish visual polish, measured phone frame rate or tactile input quality. The browser build has also been inspected in actual Chromium frame captures. A physical phone playtest and performance measurement remain pending. An intermittent baseline Godot ObjectDB-at-exit warning remains under review.
 
 ## Design and source
 

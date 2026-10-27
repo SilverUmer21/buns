@@ -18,7 +18,7 @@ Title → Play → aim/resolve → escape celebration → result → replay/trai
 
 The browser game contains six solver-verified puzzles, including **The big escape**: four Pips, one jelly, one Mango gate, one exit. The trail unlocks stages in sequence and saves progress locally. Each Next action opens an implemented stage; mastery targets remain provisional until human playtesting.
 
-Planned six-stage teaching sequence:
+Six-stage teaching sequence:
 
 | Stage | Lesson | Gate / content quality gate |
 | --- | --- | --- |
